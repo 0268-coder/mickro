@@ -4,3 +4,5 @@
 2) npm i express
 3) npm i --save-dev nodemon
 4) npm i ejs
+5) npm i dotenv
+6) 
