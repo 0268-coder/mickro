@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:8889
--- Generation Time: Nov 04, 2025 at 01:45 PM
+-- Generation Time: Nov 07, 2025 at 05:06 AM
 -- Server version: 8.0.40
 -- PHP Version: 8.3.14
 
@@ -21,15 +21,28 @@ SET time_zone = "+00:00";
 -- Database: `MicroOnlineMarket_Group1_Section8`
 --
 
+DELIMITER $$
+--
+-- Procedures
+--
+CREATE DEFINER=`root`@`localhost` PROCEDURE `change_order_status` (IN `p_order_id` INT, IN `p_new_status` VARCHAR(20))   BEGIN
+    UPDATE Order_Transaction
+    SET Status = p_new_status
+    WHERE Transaction_ID = p_order_id;
+END$$
+
+DELIMITER ;
+
 -- --------------------------------------------------------
 
 --
 -- Table structure for table `Cash`
 --
 
-CREATE TABLE `Cash` (
+CREATE TABLE IF NOT EXISTS `Cash` (
   `Payment_Method_ID` int NOT NULL,
-  `amount` decimal(10,2) NOT NULL
+  `amount` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`Payment_Method_ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
@@ -45,10 +58,12 @@ INSERT INTO `Cash` (`Payment_Method_ID`, `amount`) VALUES
 -- Table structure for table `Claim`
 --
 
-CREATE TABLE `Claim` (
+CREATE TABLE IF NOT EXISTS `Claim` (
   `User_ID` int NOT NULL,
   `Coupon_ID` int NOT NULL,
-  `time_used` int DEFAULT NULL
+  `time_used` int DEFAULT NULL,
+  PRIMARY KEY (`User_ID`,`Coupon_ID`),
+  KEY `Coupon_ID` (`Coupon_ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
@@ -68,11 +83,12 @@ INSERT INTO `Claim` (`User_ID`, `Coupon_ID`, `time_used`) VALUES
 -- Table structure for table `Coupon`
 --
 
-CREATE TABLE `Coupon` (
-  `Coupon_ID` int NOT NULL,
+CREATE TABLE IF NOT EXISTS `Coupon` (
+  `Coupon_ID` int NOT NULL AUTO_INCREMENT,
   `Coupon_Name` varchar(50) NOT NULL,
-  `Discount_Value` int NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `Discount_Value` int NOT NULL,
+  PRIMARY KEY (`Coupon_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `Coupon`
@@ -91,9 +107,10 @@ INSERT INTO `Coupon` (`Coupon_ID`, `Coupon_Name`, `Discount_Value`) VALUES
 -- Table structure for table `Credit_Card`
 --
 
-CREATE TABLE `Credit_Card` (
+CREATE TABLE IF NOT EXISTS `Credit_Card` (
   `Payment_Method_ID` int NOT NULL,
-  `Card_Number` varchar(16) NOT NULL
+  `Card_Number` varchar(16) NOT NULL,
+  PRIMARY KEY (`Payment_Method_ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
@@ -109,9 +126,11 @@ INSERT INTO `Credit_Card` (`Payment_Method_ID`, `Card_Number`) VALUES
 -- Table structure for table `Deliver`
 --
 
-CREATE TABLE `Deliver` (
+CREATE TABLE IF NOT EXISTS `Deliver` (
   `Delivery_ID` int NOT NULL,
-  `Product_ID` int NOT NULL
+  `Product_ID` int NOT NULL,
+  PRIMARY KEY (`Delivery_ID`,`Product_ID`),
+  KEY `Product_ID` (`Product_ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
@@ -131,11 +150,12 @@ INSERT INTO `Deliver` (`Delivery_ID`, `Product_ID`) VALUES
 -- Table structure for table `Delivery`
 --
 
-CREATE TABLE `Delivery` (
-  `Delivery_ID` int NOT NULL,
+CREATE TABLE IF NOT EXISTS `Delivery` (
+  `Delivery_ID` int NOT NULL AUTO_INCREMENT,
   `Delivery_address` varchar(255) DEFAULT NULL,
-  `Delivered_time` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `Delivered_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`Delivery_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `Delivery`
@@ -154,13 +174,16 @@ INSERT INTO `Delivery` (`Delivery_ID`, `Delivery_address`, `Delivered_time`) VAL
 -- Table structure for table `Login`
 --
 
-CREATE TABLE `Login` (
-  `Login_ID` int NOT NULL,
+CREATE TABLE IF NOT EXISTS `Login` (
+  `Login_ID` int NOT NULL AUTO_INCREMENT,
   `Username` varchar(50) NOT NULL,
   `Password` varbinary(100) NOT NULL,
   `Status` varchar(50) DEFAULT 'user',
-  `User_ID` int DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `User_ID` int DEFAULT NULL,
+  PRIMARY KEY (`Login_ID`),
+  UNIQUE KEY `Username` (`Username`),
+  KEY `fk_login_user` (`User_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=105 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `Login`
@@ -179,25 +202,31 @@ INSERT INTO `Login` (`Login_ID`, `Username`, `Password`, `Status`, `User_ID`) VA
 -- Table structure for table `Order_Transaction`
 --
 
-CREATE TABLE `Order_Transaction` (
-  `Transaction_ID` int NOT NULL,
+CREATE TABLE IF NOT EXISTS `Order_Transaction` (
+  `Transaction_ID` int NOT NULL AUTO_INCREMENT,
   `User_ID` int DEFAULT NULL,
   `Coupon_ID` int DEFAULT NULL,
   `Payment_Method_ID` int DEFAULT NULL,
-  `Order_Date` date DEFAULT NULL,
-  `Total_price` decimal(10,2) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `Order_Date` datetime DEFAULT CURRENT_TIMESTAMP,
+  `Total_price` decimal(10,2) DEFAULT NULL,
+  `Status` varchar(20) DEFAULT 'Pending',
+  PRIMARY KEY (`Transaction_ID`),
+  KEY `User_ID` (`User_ID`),
+  KEY `Coupon_ID` (`Coupon_ID`),
+  KEY `Payment_Method_ID` (`Payment_Method_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `Order_Transaction`
 --
 
-INSERT INTO `Order_Transaction` (`Transaction_ID`, `User_ID`, `Coupon_ID`, `Payment_Method_ID`, `Order_Date`, `Total_price`) VALUES
-(1, 3, NULL, 1, '2025-11-06', 89.00),
-(2, 2, NULL, 2, '2025-11-06', 55.00),
-(3, 5, NULL, 1, '2025-11-07', 0.00),
-(4, 4, NULL, 2, '2025-11-07', 15.00),
-(5, 5, NULL, 1, '2025-11-08', 190.00);
+INSERT INTO `Order_Transaction` (`Transaction_ID`, `User_ID`, `Coupon_ID`, `Payment_Method_ID`, `Order_Date`, `Total_price`, `Status`) VALUES
+(1, 3, 1, 1, '2025-11-07 12:00:03', 89.00, 'Pending'),
+(2, 2, 2, 2, '2025-11-07 12:00:03', 55.00, 'Pending'),
+(3, 5, 3, 1, '2025-11-07 12:00:03', 0.00, 'Delivered'),
+(4, 4, 4, 2, '2025-11-07 12:00:03', 15.00, 'Pending'),
+(5, 5, 5, 1, '2025-11-07 12:00:03', 190.00, 'Pending'),
+(6, 3, 3, 1, '2025-11-07 12:02:58', 89.00, 'Pending');
 
 -- --------------------------------------------------------
 
@@ -205,14 +234,17 @@ INSERT INTO `Order_Transaction` (`Transaction_ID`, `User_ID`, `Coupon_ID`, `Paym
 -- Table structure for table `Payment`
 --
 
-CREATE TABLE `Payment` (
-  `Payment_ID` int NOT NULL,
+CREATE TABLE IF NOT EXISTS `Payment` (
+  `Payment_ID` int NOT NULL AUTO_INCREMENT,
   `Order_ID` int NOT NULL,
   `Payment_Method_ID` int NOT NULL,
   `Amount` decimal(10,2) NOT NULL,
   `Status` enum('pending','paid','failed','refunded') NOT NULL DEFAULT 'paid',
-  `Paid_At` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `Paid_At` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`Payment_ID`),
+  KEY `idx_payment_order` (`Order_ID`),
+  KEY `idx_payment_method` (`Payment_Method_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `Payment`
@@ -231,9 +263,10 @@ INSERT INTO `Payment` (`Payment_ID`, `Order_ID`, `Payment_Method_ID`, `Amount`, 
 -- Table structure for table `Payment_Card_Detail`
 --
 
-CREATE TABLE `Payment_Card_Detail` (
+CREATE TABLE IF NOT EXISTS `Payment_Card_Detail` (
   `Payment_ID` int NOT NULL,
-  `Card_Number` varchar(16) NOT NULL
+  `Card_Number` varchar(16) NOT NULL,
+  PRIMARY KEY (`Payment_ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
@@ -250,10 +283,11 @@ INSERT INTO `Payment_Card_Detail` (`Payment_ID`, `Card_Number`) VALUES
 -- Table structure for table `Payment_Method`
 --
 
-CREATE TABLE `Payment_Method` (
-  `Payment_Method_ID` int NOT NULL,
-  `Method_Type` enum('Cash','Credit_card') NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE IF NOT EXISTS `Payment_Method` (
+  `Payment_Method_ID` int NOT NULL AUTO_INCREMENT,
+  `Method_Type` enum('Cash','Credit_card') NOT NULL,
+  PRIMARY KEY (`Payment_Method_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `Payment_Method`
@@ -269,25 +303,27 @@ INSERT INTO `Payment_Method` (`Payment_Method_ID`, `Method_Type`) VALUES
 -- Table structure for table `Product`
 --
 
-CREATE TABLE `Product` (
-  `Product_ID` int NOT NULL,
+CREATE TABLE IF NOT EXISTS `Product` (
+  `Product_ID` int NOT NULL AUTO_INCREMENT,
   `Product_Name` varchar(100) NOT NULL,
   `Product_Price` decimal(10,2) NOT NULL,
   `Length` decimal(5,2) DEFAULT NULL,
   `Height` decimal(5,2) DEFAULT NULL,
-  `Width` decimal(5,2) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `Width` decimal(5,2) DEFAULT NULL,
+  `Avg_Rating` decimal(3,2) DEFAULT '0.00',
+  PRIMARY KEY (`Product_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `Product`
 --
 
-INSERT INTO `Product` (`Product_ID`, `Product_Name`, `Product_Price`, `Length`, `Height`, `Width`) VALUES
-(1, 'Thai Jasmine Rice 5kg', 189.00, 40.00, 10.00, 30.00),
-(2, 'Cage-Free Eggs (10 pcs)', 75.00, 30.00, 8.00, 20.00),
-(3, 'Morning Glory (Pak Boong) 500g', 25.00, 35.00, 5.00, 10.00),
-(4, 'Pork Loin 1kg', 165.00, 25.00, 8.00, 15.00),
-(5, 'Seabass Cleaned 800g', 220.00, 30.00, 8.00, 12.00);
+INSERT INTO `Product` (`Product_ID`, `Product_Name`, `Product_Price`, `Length`, `Height`, `Width`, `Avg_Rating`) VALUES
+(1, 'Thai Jasmine Rice 5kg', 189.00, 40.00, 10.00, 30.00, 4.33),
+(2, 'Cage-Free Eggs (10 pcs)', 75.00, 30.00, 8.00, 20.00, 4.00),
+(3, 'Morning Glory (Pak Boong) 500g', 25.00, 35.00, 5.00, 10.00, 4.50),
+(4, 'Pork Loin 1kg', 165.00, 25.00, 8.00, 15.00, 5.00),
+(5, 'Seabass Cleaned 800g', 220.00, 30.00, 8.00, 12.00, 4.00);
 
 -- --------------------------------------------------------
 
@@ -295,13 +331,16 @@ INSERT INTO `Product` (`Product_ID`, `Product_Name`, `Product_Price`, `Length`, 
 -- Table structure for table `Review`
 --
 
-CREATE TABLE `Review` (
-  `Review_No` int NOT NULL,
+CREATE TABLE IF NOT EXISTS `Review` (
+  `Review_No` int NOT NULL AUTO_INCREMENT,
   `Product_ID` int DEFAULT NULL,
   `User_ID` int DEFAULT NULL,
   `Review_date` datetime DEFAULT NULL,
   `Review_text` text,
-  `Rating` int DEFAULT NULL
+  `Rating` int DEFAULT NULL,
+  PRIMARY KEY (`Review_No`),
+  KEY `Product_ID` (`Product_ID`),
+  KEY `User_ID` (`User_ID`)
 ) ;
 
 --
@@ -313,7 +352,48 @@ INSERT INTO `Review` (`Review_No`, `Product_ID`, `User_ID`, `Review_date`, `Revi
 (2, 2, 2, '2025-11-06 12:00:00', 'Eggs were intact and very fresh.', 4),
 (3, 3, 5, '2025-11-07 10:30:00', 'Crisp morning glory, perfect for stir-fry.', 5),
 (4, 4, 4, '2025-11-07 14:10:00', 'Pork loin was clean and tender.', 5),
-(5, 5, 5, '2025-11-08 09:20:00', 'Seabass was fresh; would buy again.', 4);
+(5, 5, 5, '2025-11-08 09:20:00', 'Seabass was fresh; would buy again.', 4),
+(6, 1, 3, '2025-11-07 11:17:26', 'Very tasty rice!', 5),
+(7, 1, 3, '2025-11-07 11:25:55', 'not good but not bad rice!', 3),
+(8, 3, 4, '2025-11-07 11:38:42', 'Fresh and high quality!', 4);
+
+--
+-- Triggers `Review`
+--
+DELIMITER $$
+CREATE TRIGGER `update_product_rating` AFTER INSERT ON `Review` FOR EACH ROW BEGIN
+  DECLARE avg_rating DECIMAL(3,2);
+
+  -- calculate the new average rating for this product
+  SELECT AVG(Rating)
+  INTO avg_rating
+  FROM Review
+  WHERE Product_ID = NEW.Product_ID;
+
+  -- update the product table with the new average
+  UPDATE Product
+  SET Avg_Rating = avg_rating
+  WHERE Product_ID = NEW.Product_ID;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `update_product_rating_after_update` AFTER UPDATE ON `Review` FOR EACH ROW BEGIN
+    DECLARE avg_rating DECIMAL(3,2);
+
+    -- calculate the new average rating for this product
+    SELECT AVG(Rating)
+    INTO avg_rating
+    FROM Review
+    WHERE Product_ID = NEW.Product_ID;
+
+    -- update product table with new average
+    UPDATE Product
+    SET Avg_Rating = avg_rating
+    WHERE Product_ID = NEW.Product_ID;
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -321,14 +401,16 @@ INSERT INTO `Review` (`Review_No`, `Product_ID`, `User_ID`, `Review_date`, `Revi
 -- Table structure for table `User`
 --
 
-CREATE TABLE `User` (
-  `ID` int NOT NULL,
+CREATE TABLE IF NOT EXISTS `User` (
+  `ID` int NOT NULL AUTO_INCREMENT,
   `Fname` varchar(50) NOT NULL,
   `Lname` varchar(50) NOT NULL,
   `Address` varchar(255) DEFAULT NULL,
   `DOB` date DEFAULT NULL,
-  `Email` varchar(100) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `Email` varchar(100) NOT NULL,
+  PRIMARY KEY (`ID`),
+  UNIQUE KEY `Email` (`Email`)
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `User`
@@ -340,164 +422,6 @@ INSERT INTO `User` (`ID`, `Fname`, `Lname`, `Address`, `DOB`, `Email`) VALUES
 (3, 'Ping', 'LeeFam', 'Phuket', '2002-03-08', 'ping@example.com'),
 (4, 'Peppo', 'Rob', 'Khon Kaen', '1999-12-05', 'peppo@example.com'),
 (5, 'Yew', 'Tia', 'Tak', '2003-06-15', 'yew@example.com');
-
---
--- Indexes for dumped tables
---
-
---
--- Indexes for table `Cash`
---
-ALTER TABLE `Cash`
-  ADD PRIMARY KEY (`Payment_Method_ID`);
-
---
--- Indexes for table `Claim`
---
-ALTER TABLE `Claim`
-  ADD PRIMARY KEY (`User_ID`,`Coupon_ID`),
-  ADD KEY `Coupon_ID` (`Coupon_ID`);
-
---
--- Indexes for table `Coupon`
---
-ALTER TABLE `Coupon`
-  ADD PRIMARY KEY (`Coupon_ID`);
-
---
--- Indexes for table `Credit_Card`
---
-ALTER TABLE `Credit_Card`
-  ADD PRIMARY KEY (`Payment_Method_ID`);
-
---
--- Indexes for table `Deliver`
---
-ALTER TABLE `Deliver`
-  ADD PRIMARY KEY (`Delivery_ID`,`Product_ID`),
-  ADD KEY `Product_ID` (`Product_ID`);
-
---
--- Indexes for table `Delivery`
---
-ALTER TABLE `Delivery`
-  ADD PRIMARY KEY (`Delivery_ID`);
-
---
--- Indexes for table `Login`
---
-ALTER TABLE `Login`
-  ADD PRIMARY KEY (`Login_ID`),
-  ADD UNIQUE KEY `Username` (`Username`),
-  ADD KEY `fk_login_user` (`User_ID`);
-
---
--- Indexes for table `Order_Transaction`
---
-ALTER TABLE `Order_Transaction`
-  ADD PRIMARY KEY (`Transaction_ID`),
-  ADD KEY `User_ID` (`User_ID`),
-  ADD KEY `Coupon_ID` (`Coupon_ID`),
-  ADD KEY `Payment_Method_ID` (`Payment_Method_ID`);
-
---
--- Indexes for table `Payment`
---
-ALTER TABLE `Payment`
-  ADD PRIMARY KEY (`Payment_ID`),
-  ADD KEY `idx_payment_order` (`Order_ID`),
-  ADD KEY `idx_payment_method` (`Payment_Method_ID`);
-
---
--- Indexes for table `Payment_Card_Detail`
---
-ALTER TABLE `Payment_Card_Detail`
-  ADD PRIMARY KEY (`Payment_ID`);
-
---
--- Indexes for table `Payment_Method`
---
-ALTER TABLE `Payment_Method`
-  ADD PRIMARY KEY (`Payment_Method_ID`);
-
---
--- Indexes for table `Product`
---
-ALTER TABLE `Product`
-  ADD PRIMARY KEY (`Product_ID`);
-
---
--- Indexes for table `Review`
---
-ALTER TABLE `Review`
-  ADD PRIMARY KEY (`Review_No`),
-  ADD KEY `Product_ID` (`Product_ID`),
-  ADD KEY `User_ID` (`User_ID`);
-
---
--- Indexes for table `User`
---
-ALTER TABLE `User`
-  ADD PRIMARY KEY (`ID`),
-  ADD UNIQUE KEY `Email` (`Email`);
-
---
--- AUTO_INCREMENT for dumped tables
---
-
---
--- AUTO_INCREMENT for table `Coupon`
---
-ALTER TABLE `Coupon`
-  MODIFY `Coupon_ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- AUTO_INCREMENT for table `Delivery`
---
-ALTER TABLE `Delivery`
-  MODIFY `Delivery_ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- AUTO_INCREMENT for table `Login`
---
-ALTER TABLE `Login`
-  MODIFY `Login_ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=105;
-
---
--- AUTO_INCREMENT for table `Order_Transaction`
---
-ALTER TABLE `Order_Transaction`
-  MODIFY `Transaction_ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- AUTO_INCREMENT for table `Payment`
---
-ALTER TABLE `Payment`
-  MODIFY `Payment_ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- AUTO_INCREMENT for table `Payment_Method`
---
-ALTER TABLE `Payment_Method`
-  MODIFY `Payment_Method_ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT for table `Product`
---
-ALTER TABLE `Product`
-  MODIFY `Product_ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- AUTO_INCREMENT for table `Review`
---
-ALTER TABLE `Review`
-  MODIFY `Review_No` int NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `User`
---
-ALTER TABLE `User`
-  MODIFY `ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- Constraints for dumped tables

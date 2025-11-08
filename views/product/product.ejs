@@ -1,0 +1,15 @@
+<%- layout('layout') %>
+    <h1>Product List</h1>
+    <!--list of products-->
+    <ul><% product.forEach(element => { %>
+           <div>
+               <li><a href="/product/<%= element.Product_ID %>"><%= element.Product_Name %></a> </li>
+               <form action="/cart" method="POST">
+                    <input type="hidden" value="<%= element.Product_ID %>" name="Product_ID">
+                    <label for="quantity">Quantity</label>
+                    <input type="number" name="quantity" size="10">
+                    <input type="submit" value="add to cart">
+               </form>
+           </div>
+        <% }); %>
+    </ul>
