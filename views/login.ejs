@@ -3,8 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Mickro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#D74B5A',
+                        secondary: '#EC909B',
+                        blush: '#FFE2E8',
+                        ivory: '#FFF5F7',
+                    },
+                    fontFamily: {
+                        script: ['"Pacifico"', 'cursive'],
+                        sans: ['"Poppins"', 'ui-sans-serif', 'system-ui'],
+                    },
+                },
+            },
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
 </head>
-<body>
+<body class="bg-blush min-h-screen flex items-center justify-center font-sans relative overflow-hidden">
+    <div class="relative w-full max-w-sm">
+        <div class="bg-white/95 rounded-[32px] shadow-[0_25px_60px_rgba(236,144,155,0.45)] aspect-square flex flex-col justify-center px-10 py-8">
+            <div class="flex flex-col items-center text-center space-y-6">
+            <img src="/images/@micro_logo.png" alt="Micro" class="w-40 h-40 object-contain drop-shadow-md">
+            <h2 class="text-primary tracking-[0.35em] text-xs uppercase font-medium">Your Fat &amp; Your Choice</h2>
+        </div>
+            <form class="mt-8 space-y-4">
+                <div class="space-y-3">
+                    <input
+                        type="text"
+                        name="username"
+                        placeholder="Username"
+                        class="w-full rounded-full bg-ivory px-5 py-3 text-sm placeholder:text-[#D1A3AA] shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary focus:bg-white transition"
+                        required
+                    >
+                    <input
+                        type="password"
+                        name="password"
+                        placeholder="Password"
+                        class="w-full rounded-full bg-ivory px-5 py-3 text-sm placeholder:text-[#D1A3AA] shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary focus:bg-white transition"
+                        required
+                    >
+                </div>
+                <div class="flex items-center justify-between gap-4 pt-2">
+                    <button
+                        type="submit"
+                        class="flex-1 rounded-full bg-primary text-white text-base font-medium py-3 shadow-md hover:bg-primary/90 transition"
+                    >
+                        Login
+                    </button>
+                    <a
+                        href="/register"
+                        class="flex-1 rounded-full border border-secondary bg-ivory text-secondary text-base font-medium py-3 text-center shadow-sm hover:bg-secondary/10 transition"
+                    >
+                        Register
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 </html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mickro • Delivery Address</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        blush: '#FBD7D7',
+                        rose: '#FCE5E5',
+                        cherry: '#D94F5C',
+                        cherryDark: '#BE3B48',
+                        label: '#C64C5A',
+                        placeholder: '#F5B8B8'
+                    },
+                    fontFamily: {
+                        nunito: ['"Nunito"', 'sans-serif'],
+                        pacifico: ['"Pacifico"', 'cursive']
+                    },
+                    boxShadow: {
+                        soft: '0 20px 60px rgba(217, 79, 92, 0.15)'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body class="min-h-screen bg-blush font-nunito text-cherry">
+    <div class="flex min-h-screen flex-col gap-10">
+        <header class="px-6 pt-6">
+            <a href="/" class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-rose shadow-soft hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-cherry focus-visible:ring-offset-2 focus-visible:ring-offset-blush transition">
+                <span class="text-cherry text-2xl leading-none">&larr;</span>
+            </a>
+        </header>
+
+        <main class="px-6 pb-16">
+            <div class="mx-auto w-full max-w-xl rounded-[32px] bg-rose p-8 text-center shadow-soft">
+                <h1 class="text-4xl font-extrabold text-cherry mb-6">Delivery Address</h1>
+                <form class="space-y-6">
+                    <div class="text-left">
+                        <label for="address" class="block text-lg font-semibold text-label mb-3">Please enter your address</label>
+                        <textarea id="address" name="address" rows="5" placeholder="Enter your address" class="w-full rounded-3xl border-none bg-white/90 px-6 py-4 text-base text-cherry placeholder:text-placeholder shadow-inner focus:outline-none focus:ring-2 focus:ring-cherry"></textarea>
+                    </div>
+                    <button type="submit" class="mx-auto inline-flex w-40 items-center justify-center rounded-full bg-cherry px-6 py-3 text-lg font-semibold text-white shadow-soft transition hover:bg-cherryDark focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-rose">Save</button>
+                </form>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

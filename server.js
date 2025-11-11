@@ -25,12 +25,6 @@ connection.connect(function(err) {
     console.log("Connected!")
 })
 
-connection.query('SELECT * from review where product_id = 1', (err, result, fields) => {
-  if (err) throw err
-
-  console.log(result)
-})
-
 
 //use ejs and views at directiory/views
 app.set('view engine','ejs')
@@ -38,7 +32,7 @@ app.set('views', path.join(__dirname,"views"))
 
 //
 app.get("/",(req,res)=>{
-    res.render("public",{hey: "World"})
+    res.render("Address.ejs")
 })
 
 const usersRouter = require("./routes/users")

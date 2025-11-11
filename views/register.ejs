@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mickro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body style="font-family: 'Poppins', sans-serif;" class="min-h-screen bg-gradient-to-b from-[#ffe5ec] to-[#ffd9e4] flex flex-col items-center">
+    <header class="flex flex-col items-center pt-12 pb-6">
+        <img src="/images/@micro_logo.png" alt="Micro logo" class="w-36 md:w-48">
+        <h1 class="mt-6 text-4xl font-semibold text-[#cc4a5a] tracking-wide">welcome</h1>
+    </header>
+
+    <main class="w-full max-w-xl px-6 pb-16">
+        <section class="bg-white/80 backdrop-blur-sm border border-white/60 shadow-[0_24px_60px_rgba(214,118,133,0.35)] rounded-[36px] p-8 md:p-10">
+            <h2 class="text-center text-xl font-semibold text-[#cc4a5a]">Please enter your personal information</h2>
+            <form class="mt-8 space-y-5">
+                <div>
+                    <label class="block text-sm font-semibold text-[#cc4a5a]" for="firstName">First Name</label>
+                    <input id="firstName" name="firstName" type="text" placeholder="Enter your first name" class="mt-2 w-full rounded-full border border-white/60 bg-white px-5 py-3 text-sm text-[#a65866] placeholder-[#e3a9b3] shadow-inner focus:border-[#d96a79] focus:outline-none focus:ring-2 focus:ring-[#f4a0ad]">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-[#cc4a5a]" for="lastName">Last Name</label>
+                    <input id="lastName" name="lastName" type="text" placeholder="Enter your last name" class="mt-2 w-full rounded-full border border-white/60 bg-white px-5 py-3 text-sm text-[#a65866] placeholder-[#e3a9b3] shadow-inner focus:border-[#d96a79] focus:outline-none focus:ring-2 focus:ring-[#f4a0ad]">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-[#cc4a5a]" for="username">Username</label>
+                    <input id="username" name="username" type="text" placeholder="Enter your username" class="mt-2 w-full rounded-full border border-white/60 bg-white px-5 py-3 text-sm text-[#a65866] placeholder-[#e3a9b3] shadow-inner focus:border-[#d96a79] focus:outline-none focus:ring-2 focus:ring-[#f4a0ad]">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-[#cc4a5a]" for="email">Email</label>
+                    <input id="email" name="email" type="email" placeholder="Enter your email" class="mt-2 w-full rounded-full border border-white/60 bg-white px-5 py-3 text-sm text-[#a65866] placeholder-[#e3a9b3] shadow-inner focus:border-[#d96a79] focus:outline-none focus:ring-2 focus:ring-[#f4a0ad]">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-[#cc4a5a]" for="password">Password</label>
+                    <input id="password" name="password" type="password" placeholder="Enter the password" class="mt-2 w-full rounded-full border border-white/60 bg-white px-5 py-3 text-sm text-[#a65866] placeholder-[#e3a9b3] shadow-inner focus:border-[#d96a79] focus:outline-none focus:ring-2 focus:ring-[#f4a0ad]">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-[#cc4a5a]" for="confirmPassword">Confirm Password</label>
+                    <input id="confirmPassword" name="confirmPassword" type="password" placeholder="Re-enter the password" class="mt-2 w-full rounded-full border border-white/60 bg-white px-5 py-3 text-sm text-[#a65866] placeholder-[#e3a9b3] shadow-inner focus:border-[#d96a79] focus:outline-none focus:ring-2 focus:ring-[#f4a0ad]">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-[#cc4a5a]" for="dateOfBirth">Date of Birth</label>
+                    <input id="dateOfBirth" name="dateOfBirth" type="date" placeholder="Enter your date of birth" class="mt-2 w-full rounded-full border border-white/60 bg-white px-5 py-3 text-sm text-[#a65866] placeholder-transparent shadow-inner focus:border-[#d96a79] focus:outline-none focus:ring-2 focus:ring-[#f4a0ad]">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-[#cc4a5a]" for="phoneNumber">Phone Number</label>
+                    <input id="phoneNumber" name="phoneNumber" type="tel" placeholder="Enter your phone number" class="mt-2 w-full rounded-full border border-white/60 bg-white px-5 py-3 text-sm text-[#a65866] placeholder-[#e3a9b3] shadow-inner focus:border-[#d96a79] focus:outline-none focus:ring-2 focus:ring-[#f4a0ad]">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-[#cc4a5a]" for="address">Address</label>
+                    <input id="address" name="address" type="text" placeholder="Enter your address" class="mt-2 w-full rounded-full border border-white/60 bg-white px-5 py-3 text-sm text-[#a65866] placeholder-[#e3a9b3] shadow-inner focus:border-[#d96a79] focus:outline-none focus:ring-2 focus:ring-[#f4a0ad]">
+                </div>
+                <button type="submit" class="mt-6 w-full rounded-full bg-[#d85a69] px-5 py-3 text-lg font-semibold text-white shadow-md transition hover:bg-[#c24a58] focus:outline-none focus:ring-4 focus:ring-[#f4a0ad]">
+                    Register
+                </button>
+            </form>
+        </section>
+    </main>
+</body>
+</html>
