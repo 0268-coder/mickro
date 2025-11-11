@@ -6,8 +6,9 @@
                <li><a href="/product/<%= element.Product_ID %>"><%= element.Product_Name %></a> </li>
                <form action="/cart" method="POST">
                     <input type="hidden" value="<%= element.Product_ID %>" name="Product_ID">
+                    <input type="hidden" value="<%= element.Product_Price %>" name="Product_Price">
                     <label for="quantity">Quantity</label>
-                    <input type="number" name="quantity" size="10">
+                    <input type="number" name="quantity" value="1" min="1">
                     <input type="submit" value="add to cart">
                </form>
            </div>

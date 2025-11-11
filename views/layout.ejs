@@ -8,7 +8,7 @@
         .header-nav {
             list-style: none;
             padding: 10px 0;
-            background-color: #333;
+            background-color: #9b6f6f;
             margin: 0;
             display: flex;
             justify-content: flex-end; /* Pushes links to the right */
@@ -30,6 +30,7 @@
                 <li><a href="/">Home</a></li>
                 <li><a href="/login">Login</a></li>
                 <li><a href="/cart">Cart</a></li>
+                <li><a href="/product">Product</a></li>
             </ul>
         </nav>
     </header>
@@ -37,5 +38,7 @@
     <main>
         <%- body %>
     </main>
+    <script src="/delete_cart.js"></script>
+    <script src="/update_to_cart.js"></script>
 </body>
 </html>

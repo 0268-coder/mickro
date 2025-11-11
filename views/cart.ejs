@@ -1,0 +1,13 @@
+<%- layout('layout') %>
+
+<% cart.forEach(element => {%>
+    <div class="cart-item" id="item<%= element.id %>">
+        <p>cart id: <%= element.id %> Qauntity: <%= element.qty %></p>
+
+        <button class="increase-btn" data-item-id="<%=element.id %>">+</button>
+        <button class="decrease-btn" data-item-id="<%=element.id %>">-</button>
+        <button class="delete-btn" data-item-id="<%= element.id %>">Delete</button>
+    </div>
+<%}); %>
+
+Total Price = <%= total %>
