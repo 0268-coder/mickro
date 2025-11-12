@@ -2,7 +2,9 @@
 
 <% cart.forEach(element => {%>
     <div class="cart-item" id="item<%= element.id %>">
-        <p>cart id: <%= element.id %> Qauntity: <%= element.qty %></p>
+        <p>cart id: <%= element.id %> Qauntity: 
+            <span class="quantity-display"><%= element.qty %></span>
+        </p>
 
         <button class="increase-btn" data-item-id="<%=element.id %>">+</button>
         <button class="decrease-btn" data-item-id="<%=element.id %>">-</button>
@@ -10,4 +12,13 @@
     </div>
 <%}); %>
 
-Total Price = <%= total %>
+<a href="/payment_method">Payment Method:</a>
+<% if(payment_type){ %>
+    <%= payment_type %>
+<%}%>
+<br>
+<p></p>
+Total Price = <span id="total-price"><%= total %></span>
+<from href="/checkout" method="POST">
+    <input type="submit" name="checkout-btn" value="checkout">
+</from>

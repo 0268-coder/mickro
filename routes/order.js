@@ -16,7 +16,7 @@ router.post('/', async (req,res) =>{
       //insert into query
       const [result] = await db.query(sql,value)
 
-      res.redirect(201).json({
+      return res.redirect(201).json({
         message:"1 record to order"
       })
     }

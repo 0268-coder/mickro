@@ -16,10 +16,10 @@ router.get('/:id',async(req,res)=>{
         const [result] = await db.query('SELECT * FROM Product WHERE Product_ID = ?',req.params.id);
         console.log(result)
         //render product/id
-        res.render('product/detail', {product: result[0]})
+        return res.render('product/detail', {product: result[0]})
     }
     catch(err){
-        console.error("Error occur product id",error.message)
+        console.error("Error occur product id",err.message)
     }
 })
 

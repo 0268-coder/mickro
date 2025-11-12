@@ -1,0 +1,9 @@
+<% layout('layout') %>
+
+<h2>Payment Type</h2>
+<% get_payment_method.forEach(method=>{ %>
+    <ul>
+        <li><a href="/payment_method/type/<%= method.Payment_Method_ID %>"><%= method.Method_Type %></a></li>
+    </ul>
+<% }) %>
+
