@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Micro - Fresh Market</title>
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    html { scroll-behavior: smooth; }
+
+    /* Animation for category highlight */
+    .highlight-section {
+      animation: pulse-pink 1.5s ease-out;
+    }
+    @keyframes pulse-pink {
+      0% { background-color: transparent; }
+      50% { 
+        background-color: #FCE7F3; /* pink-100 */
+        transform: scale(1.02);
+        box-shadow: 0 4px 10px rgba(236, 72, 153, 0.2);
+        border-radius: 8px;
+      }
+      100% { 
+        background-color: transparent; 
+        transform: scale(1);
+        box-shadow: none;
+      }
+    }
+  </style>
+  <!-- Google Places script removed -->
+</head>
+<body class="bg-pink-50 text-gray-800">
+  <!-- Delivery Bar (Re-added, no API) -->
+  <div class="bg-pink-600 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex justify-between items-center text-sm">
+      <button id="delivery-address-button" class="flex items-center space-x-2 group">
+        <svg class="w-5 h-5 text-pink-200 group-hover:text-white transition" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+        <span class="font-medium group-hover:underline">Deliver to: <span id="delivery-address-text" class="font-bold">Set Address</span></span>
+      </button>
+      <!-- "Free shipping" text removed -->
+      <div class="hidden sm:block"></div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="bg-white shadow-md sticky top-0 z-50">
+    <nav id="main-nav" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-24 transition-all duration-300">
+      <div class="flex justify-between items-center h-full">
+        <div class="flex-shrink-0">
+          <a href="#"><img id="logo-img" class="h-20 w-auto transition-all duration-300" src="logo.png" alt="Micro Logo" onerror="this.alt='Micro Logo'; this.src='https://placehold.co/200x80/FBCFE8/9D174D?text=Micro';" /></a>
+        </div>
+        <div class="hidden md:flex md:items-center md:space-x-8" id="nav-links">
+          <!-- Nav links updated with IDs -->
+          <a href="#home-section" id="nav-home" class="nav-link font-semibold text-pink-600 border-b-2 border-pink-600 px-1 py-2">Home</a>
+          <a href="#shop-by-category" id="nav-shop" class="nav-link font-medium text-gray-600 hover:text-pink-500 transition-all duration-200 transform hover:-translate-y-0.5">Shop</a>
+          <!-- Sale link scrolls to dairy section (which has the sale item) -->
+          <a href="#dairy-section" id="nav-sale" class="nav-link font-medium text-gray-600 hover:text-pink-500 transition-all duration-200 transform hover:-translate-y-0.5">Sale</a>
+        </div>
+        <div class="flex items-center space-x-4">
+          <!-- Search -->
+          <div class="hidden sm:block">
+            <form id="search-form" class="relative">
+              <input type="text" id="search-input" placeholder="Search products..." class="px-4 py-2 pr-10 border border-pink-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent" />
+              <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-pink-400 hover:text-pink-600" aria-label="Search">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+              </button>
+            </form>
+          </div>
+          <!-- Icons -->
+          <a href="#" class="text-gray-600 hover:text-pink-500 transition" id="user-button" aria-label="Login">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+          </a>
+          <!-- Profile Button (Replaced Wishlist) -->
+          <a href="#" class="relative text-gray-600 hover:text-pink-500 transition" id="profile-button" aria-label="User Profile">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.096 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+          </a>
+          <a href="#" class="relative text-gray-600 hover:text-pink-500 transition" id="cart-button" aria-label="Cart">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+            <span id="cart-count" class="absolute -top-2 -right-2 bg-pink-500 text-white text-xs font-bold w-5 h-5 rounded-full hidden items-center justify-center">0</span>
+          </a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main -->
+  <main>
+    <!-- Hero (ID added) -->
+    <section id="home-section" class="bg-gradient-to-r from-pink-100 to-pink-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 flex flex-col md:flex-row items-center">
+        <div class="md:w-1/2 text-center md:text-left">
+          <h1 class="text-4xl md:text-6xl font-extrabold text-pink-800 leading-tight">Freshness at Your Fingertips</h1>
+          <p class="mt-4 text-lg text-pink-600 max-w-lg">Get the best farm-fresh vegetables, fruits, and groceries delivered to your door.</p>
+          <a href="#featured-products" class="mt-8 inline-block px-8 py-3 bg-pink-600 text-white font-semibold rounded-full shadow-lg hover:bg-pink-700 transform hover:scale-105 transition-all duration-300">Shop Now</a>
+        </div>
+        <div class="md:w-1/2 mt-10 md:mt-0">
+          <img src="logo.png" alt="Fresh Produce Collection" class="rounded-lg shadow-2xl" onerror="this.alt='Fresh Produce Collection'; this.src='https://placehold.co/600x400/FBCFE8/9D174D?text=Fresh+Produce';" />
+        </div>
+      </div>
+    </section>
+
+    <!-- Categories (grid of 4) -->
+    <section id="shop-by-category" class="py-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-center mb-12 text-pink-800">Shop by Category</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <!-- Updated category links to scroll and highlight -->
+          <a href="#produce-section" class="group block category-link" data-target="produce-section">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden transform group-hover:shadow-xl group-hover:-translate-y-1 transition-all duration-300">
+              <img src="category-produce.png" alt="Produce" class="h-40 w-full object-cover" onerror="this.alt='Produce'; this.src='https://placehold.co/300x200/FCE7F3/EC4899?text=Produce';" />
+              <h3 class="p-4 text-center font-semibold text-lg text-pink-700 group-hover:text-pink-800 transition">Produce</h3>
+            </div>
+          </a>
+          <a href="#dairy-section" class="group block category-link" data-target="dairy-section">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden transform group-hover:shadow-xl group-hover:-translate-y-1 transition-all duration-300">
+              <img src="category-dairy.png" alt="Dairy" class="h-40 w-full object-cover" onerror="this.alt='Dairy'; this.src='https://placehold.co/300x200/FCE7F3/EC4899?text=Dairy';" />
+              <h3 class="p-4 text-center font-semibold text-lg text-pink-700 group-hover:text-pink-800 transition">Dairy</h3>
+            </div>
+          </a>
+          <a href="#meat-section" class="group block category-link" data-target="meat-section">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden transform group-hover:shadow-xl group-hover:-translate-y-1 transition-all duration-300">
+              <img src="category-meat.png" alt="Meat" class="h-40 w-full object-cover" onerror="this.alt='Meat'; this.src='https://placehold.co/300x200/FCE7F3/EC4899?text=Meat';" />
+              <h3 class="p-4 text-center font-semibold text-lg text-pink-700 group-hover:text-pink-800 transition">Meat</h3>
+            </div>
+          </a>
+          <a href="#seafood-section" class="group block category-link" data-target="seafood-section">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden transform group-hover:shadow-xl group-hover:-translate-y-1 transition-all duration-300">
+              <img src="category-seafood.png" alt="Seafood" class="h-40 w-full object-cover" onerror="this.alt='Seafood'; this.src='https://placehold.co/300x200/FCE7F3/EC4899?text=Seafood';" />
+              <h3 class="p-4 text-center font-semibold text-lg text-pink-700 group-hover:text-pink-800 transition">Seafood</h3>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Featured by Category (your real products) -->
+    <section id="featured-products" class="py-16 bg-pink-100">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-center mb-12 text-pink-800">Featured Products</h2>
+
+        <!-- Added IDs and classes for category scrolling/highlighting -->
+        <h3 id="produce-section" class="product-section-heading text-2xl font-semibold text-pink-700 mb-6 -mt-24 pt-28">Rice & Grains</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+          <div class="product-card rounded-2xl bg-white shadow-lg ring-1 ring-black/5 overflow-hidden" data-name="Thai Jasmine Rice 5kg">
+            <!-- Product image added -->
+            <div class="relative h-56">
+              <span class="absolute top-3 left-3 px-2.5 py-1 text-xs font-bold rounded-lg bg-pink-600 text-white z-10">HOT</span>
+              <img src="jasmine-rice.png" alt="Thai Jasmine Rice 5kg" class="w-full h-56 object-cover" onerror="this.alt='Thai Jasmine Rice 5kg'; this.src='https://placehold.co/400x300/F9FAFB/E11D48?text=Jasmine+Rice';">
+            </div>
+            <div class="border-t">
+              <div class="p-6">
+                <p class="text-lg font-semibold text-gray-900">Premium Thai Jasmine Rice 5kg</p>
+                <p class="mt-2 text-2xl font-extrabold text-pink-600">฿189.00</p>
+                <!-- data-image updated -->
+                <button class="add-to-cart-btn mt-6 w-full rounded-2xl bg-pink-100 text-pink-700 font-bold py-3 hover:bg-pink-600 hover:text-white transition-all" data-id="rice" data-name="Thai Jasmine Rice 5kg" data-price="189" data-image="jasmine-rice.png">Add to Cart</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h3 id="dairy-section" class="product-section-heading text-2xl font-semibold text-pink-700 mb-6 -mt-24 pt-28">Eggs & Dairy</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+          <div class="product-card rounded-2xl bg-white shadow-lg ring-1 ring-black/5 overflow-hidden" data-name="Cage-Free Eggs (10 pcs)">
+            <!-- Product image added -->
+            <div class="relative h-56">
+              <span class="absolute top-3 left-3 px-2.5 py-1 text-xs font-bold rounded-lg bg-gray-800 text-white z-10">SALE</span>
+              <img src="cage-free-eggs.png" alt="Cage-Free Eggs (10 pcs)" class="w-full h-56 object-cover" onerror="this.alt='Cage-Free Eggs (10 pcs)'; this.src='https://placehold.co/400x300/F9FAFB/E11D48?text=Eggs';">
+            </div>
+            <div class="border-t">
+              <div class="p-6">
+                <p class="text-lg font-semibold text-gray-900">Farm Fresh Cage-Free Eggs (10 pcs)</p>
+                <p class="mt-2 text-2xl font-extrabold text-pink-600">฿75.00</p>
+                <!-- data-image updated -->
+                <button class="add-to-cart-btn mt-6 w-full rounded-2xl bg-pink-100 text-pink-700 font-bold py-3 hover:bg-pink-600 hover:text-white transition-all" data-id="eggs" data-name="Cage-Free Eggs (10 pcs)" data-price="75" data-image="cage-free-eggs.png">Add to Cart</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h3 id="vegetable-section" class="product-section-heading text-2xl font-semibold text-pink-700 mb-6 -mt-24 pt-28">Vegetables</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+          <div class="product-card rounded-2xl bg-white shadow-lg ring-1 ring-black/5 overflow-hidden" data-name="Morning Glory (Pak Boong) 500g">
+            <!-- Product image added -->
+            <div class="relative h-56">
+              <img src="morning-glory.png" alt="Morning Glory (Pak Boong) 500g" class="w-full h-56 object-cover" onerror="this.alt='Morning Glory (Pak Boong) 500g'; this.src='https://placehold.co/400x300/F9FAFB/E11D48?text=Morning+Glory';">
+            </div>
+            <div class="border-t">
+              <div class="p-6">
+                <p class="text-lg font-semibold text-gray-900">Fresh Morning Glory (Pak Boong) 500g</p>
+                <p class="mt-2 text-2xl font-extrabold text-pink-600">฿25.00</p>
+                <!-- data-image updated -->
+                <button class="add-to-cart-btn mt-6 w-full rounded-2xl bg-pink-100 text-pink-700 font-bold py-3 hover:bg-pink-600 hover:text-white transition-all" data-id="pakboong" data-name="Morning Glory (Pak Boong) 500g" data-price="25" data-image="morning-glory.png">Add to Cart</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <h3 id="meat-section" class="product-section-heading text-2xl font-semibold text-pink-700 mb-6 -mt-24 pt-28">Meat</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+          <div class="product-card rounded-2xl bg-white shadow-lg ring-1 ring-black/5 overflow-hidden" data-name="Pork Loin 1kg">
+            <!-- Product image added -->
+            <div class="relative h-56">
+              <img src="pork-loin.png" alt="Pork Loin 1kg" class="w-full h-56 object-cover" onerror="this.alt='Pork Loin 1kg'; this.src='https://placehold.co/400x300/F9FAFB/E11D48?text=Pork+Loin';">
+            </div>
+            <div class="border-t">
+              <div class="p-6">
+                <p class="text-lg font-semibold text-gray-900">Premium Pork Loin 1kg</p>
+                <p class="mt-2 text-2xl font-extrabold text-pink-600">฿165.00</p>
+                <!-- data-image updated -->
+                <button class="add-to-cart-btn mt-6 w-full rounded-2xl bg-pink-100 text-pink-700 font-bold py-3 hover:bg-pink-600 hover:text-white transition-all" data-id="pork" data-name="Pork Loin 1kg" data-price="165" data-image="pork-loin.png">Add to Cart</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h3 id="seafood-section" class="product-section-heading text-2xl font-semibold text-pink-700 mb-6 -mt-24 pt-28">Seafood</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div class="product-card rounded-2xl bg-white shadow-lg ring-1 ring-black/5 overflow-hidden" data-name="Seabass Cleaned 800g">
+            <!-- Product image added -->
+            <div class="relative h-56">
+              <img src="seabass.png" alt="Seabass Cleaned 800g" class="w-full h-56 object-cover" onerror="this.alt='Seabass Cleaned 800g'; this.src='https://placehold.co/400x300/F9FAFB/E11D48?text=Seabass';">
+            </div>
+            <div class="border-t">
+              <div class="p-6">
+                <p class="text-lg font-semibold text-gray-900">Seabass Cleaned 800g</p>
+                <p class="mt-2 text-2xl font-extrabold text-pink-600">฿220.00</p>
+                <!-- data-image updated -->
+                <button class="add-to-cart-btn mt-6 w-full rounded-2xl bg-pink-100 text-pink-700 font-bold py-3 hover:bg-pink-600 hover:text-white transition-all" data-id="seabass" data-name="Seabass Cleaned 800g" data-price="220" data-image="seabass.png">Add to Cart</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Sale Banner Removed -->
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-pink-100 pt-16 pb-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+        <div>
+          <h4 class="text-2xl font-bold text-pink-600 mb-4">Micro</h4>
+          <p class="text-pink-900 text-sm mb-4">Your one-stop shop for all things fresh.</p>
+          <div class="flex space-x-4">
+            <a href="#" class="text-pink-500 hover:text-pink-700">FB</a>
+            <a href="#" class="text-pink-500 hover:text-pink-700">IG</a>
+            <a href="#" class="text-pink-500 hover:text-pink-700">TW</a>
+          </div>
+        </div>
+        <div>
+          <h5 class="font-bold text-pink-800 mb-4">Shop</h5>
+          <ul class="space-y-2 text-sm">
+            <li><a href="#" class="text-gray-600 hover:text-pink-500 transition-all duration-200 transform hover:scale-105 inline-block">Produce</a></li>
+            <li><a href="#" class="text-gray-600 hover:text-pink-500 transition-all duration-200 transform hover:scale-105 inline-block">Dairy</a></li>
+            <li><a href="#" class="text-gray-600 hover:text-pink-500 transition-all duration-200 transform hover:scale-105 inline-block">Meat</a></li>
+            <li><a href="#" class="text-gray-600 hover:text-pink-500 transition-all duration-200 transform hover:scale-105 inline-block">Seafood</a></li>
+          </ul>
+        </div>
+        <div>
+          <h5 class="font-bold text-pink-800 mb-4">Help</h5>
+          <ul class="space-y-2 text-sm">
+            <li><a href="#" class="text-gray-600 hover:text-pink-500 transition-all duration-200 transform hover:scale-105 inline-block">Contact Us</a></li>
+            <li><a href="#" class="text-gray-600 hover:text-pink-500 transition-all duration-200 transform hover:scale-105 inline-block">FAQ</a></li>
+            <li><a href="#" class="text-gray-600 hover:text-pink-500 transition-all duration-200 transform hover:scale-105 inline-block">Shipping & Returns</a></li>
+            <li><a href="#" class="text-gray-600 hover:text-pink-500 transition-all duration-200 transform hover:scale-105 inline-block">My Account</a></li>
+          </ul>
+        </div>
+        <div>
+          <h5 class="font-bold text-pink-800 mb-4">Company</h5>
+          <ul class="space-y-2 text-sm">
+            <li><a href="#" class="text-gray-600 hover:text-pink-500 transition-all duration-200 transform hover:scale-105 inline-block">About Us</a></li>
+            <li><a href="#" class="text-gray-600 hover:text-pink-500 transition-all duration-200 transform hover:scale-105 inline-block">Careers</a></li>
+            <li><a href="#" class="text-gray-600 hover:text-pink-500 transition-all duration-200 transform hover:scale-105 inline-block">Privacy Policy</a></li>
+            <li><a href="#" class="text-gray-600 hover:text-pink-500 transition-all duration-200 transform hover:scale-105 inline-block">Terms of Service</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-pink-100 pt-8 text-center text-sm text-pink-400">&copy; 2025 Micro. All rights reserved.</div>
+    </div>
+  </footer>
+
+  <!-- Modals -->
+  <!-- Login Modal -->
+  <div id="login-modal" class="modal fixed inset-0 z-50 items-center justify-center hidden" aria-hidden="true">
+    <div class="bg-white rounded-lg shadow-xl p-8 max-w-sm w-full relative">
+      <button class="modal-close-btn absolute top-3 right-3 text-gray-600 hover:text-pink-500 transition-transform hover:rotate-90" aria-label="Close login">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+      <h3 class="text-2xl font-bold text-pink-800 text-center mb-6">Login</h3>
+      <form id="login-form">
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2" for="login-email">Email</label>
+          <input id="login-email" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-pink-500" type="email" placeholder="you@example.com" required />
+        </div>
+        <div class="mb-6">
+          <label class="block text-gray-700 text-sm font-bold mb-2" for="login-password">Password</label>
+          <input id="login-password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-pink-500" type="password" placeholder="******************" required />
+        </div>
+        <div class="flex items-center justify-between">
+          <button class="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline transition" type="submit">Sign In</button>
+        </div>
+        <div id="login-message" class="text-center text-sm mt-4"></div>
+        <p class="text-center text-gray-600 text-sm mt-6">Don't have an account? <a href="#" id="show-signup-link" class="font-bold text-pink-600 hover:text-pink-800">Sign Up</a></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Sign Up Modal -->
+  <div id="signup-modal" class="modal fixed inset-0 z-50 items-center justify-center hidden" aria-hidden="true">
+    <div class="bg-white rounded-lg shadow-xl p-8 max-w-sm w-full relative">
+      <button class="modal-close-btn absolute top-3 right-3 text-gray-600 hover:text-pink-500 transition-transform hover:rotate-90" aria-label="Close signup">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+      <h3 class="text-2xl font-bold text-pink-800 text-center mb-6">Create Account</h3>
+      <form id="signup-form">
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2" for="signup-email">Email</label>
+          <input id="signup-email" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-pink-500" type="email" placeholder="you@example.com" required />
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2" for="signup-password">Password</label>
+          <input id="signup-password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-pink-500" type="password" placeholder="******************" required />
+        </div>
+        <div class="mb-6">
+          <label class="block text-gray-700 text-sm font-bold mb-2" for="signup-password-confirm">Confirm Password</label>
+          <input id="signup-password-confirm" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-pink-500" type="password" placeholder="******************" required />
+        </div>
+        <div class="flex items-center justify-between">
+          <button class="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline transition" type="submit">Create Account</button>
+        </div>
+        <div id="signup-message" class="text-center text-sm mt-4"></div>
+        <p class="text-center text-gray-600 text-sm mt-6">Already have an account? <a href="#" id="show-login-link" class="font-bold text-pink-600 hover:text-pink-800">Sign In</a></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Profile Modal (Replaced Wishlist) -->
+  <div id="profile-modal" class="modal fixed inset-0 z-50 items-center justify-center hidden" aria-hidden="true">
+    <div class="bg-white rounded-lg shadow-xl p-8 max-w-sm w-full relative">
+      <button class="modal-close-btn absolute top-3 right-3 text-gray-600 hover:text-pink-500 transition-transform hover:rotate-90" aria-label="Close profile">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+      <h3 class="text-2xl font-bold text-pink-800 text-center mb-6">User Profile</h3>
+      <div class="text-center text-gray-600">
+        <svg class="w-16 h-16 text-pink-200 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.096 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+        <p>User profile management coming soon!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Address Modal (Re-added, no API) -->
+  <div id="address-modal" class="modal fixed inset-0 z-50 items-center justify-center hidden" aria-hidden="true">
+    <div class="bg-white rounded-lg shadow-xl p-6 max-w-2xl w-full relative">
+      <button class="modal-close-btn absolute top-3 right-3 text-gray-600 hover:text-pink-500 transition-transform hover:rotate-90" aria-label="Close map">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+      <h3 class="text-2xl font-bold text-pink-800 text-center mb-4">Set Your Delivery Address</h3>
+      <div class="relative mb-4">
+        <input id="address-input" type="text" placeholder="Enter your street address or zip code..." class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-pink-500" />
+      </div>
+      <button id="confirm-address-btn" class="mt-4 w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition">Confirm Address</button>
+    </div>
+  </div>
+
+  <!-- Overlay & Cart Panel -->
+  <div id="modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden transition-opacity duration-300 opacity-0" aria-hidden="true"></div>
+
+  <div id="cart-panel" class="fixed top-0 right-0 h-full w-full max-w-md bg-white z-50 shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out" role="dialog" aria-modal="true" aria-labelledby="cart-heading" aria-hidden="true">
+    <div class="flex justify-between items-center p-4 border-b border-pink-100">
+      <h2 id="cart-heading" class="text-xl font-bold text-pink-800">Shopping Cart</h2>
+      <button id="close-cart-btn" class="text-gray-600 hover:text-pink-500 transition-transform hover:rotate-9T0" aria-label="Close cart">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+    <div id="cart-items-container" class="p-4 overflow-y-auto" style="height: calc(100vh - 150px);">
+      <p class="text-gray-500 text-center py-4">Your cart is empty.</p>
+    </div>
+    <div id="cart-footer" class="absolute bottom-0 left-0 w-full bg-white border-t border-pink-100 p-4">
+      <div class="flex justify-between items-center mb-4">
+        <span class="text-lg font-bold text-gray-800">Subtotal:</span>
+        <span id="cart-total" class="text-2xl font-bold text-pink-600">$0.00</span>
+      </div>
+      <button class="w-full bg-pink-600 text-white font-semibold py-3 rounded-lg shadow-lg hover:bg-pink-700 transition-all duration-300">Proceed to Checkout</button>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script>
+    // initPlaces function removed
+    
+    window.addEventListener('scroll', () => {
+      const nav = document.getElementById('main-nav');
+      const logo = document.getElementById('logo-img');
+      if (!nav || !logo) return;
+      const scrolled = document.body.scrollTop > 50 || document.documentElement.scrollTop > 50;
+      nav.classList.toggle('h-24', !scrolled);
+      nav.classList.toggle('h-16', scrolled);
+      logo.classList.toggle('h-20', !scrolled);
+      logo.classList.toggle('h-12', scrolled);
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      let cart = [];
+      const cartButton = document.getElementById('cart-button');
+      const cartPanel = document.getElementById('cart-panel');
+      const modalOverlay = document.getElementById('modal-overlay');
+      const closeCartBtn = document.getElementById('close-cart-btn');
+      const cartItemsContainer = document.getElementById('cart-items-container');
+      const cartCount = document.getElementById('cart-count');
+      const cartTotal = document.getElementById('cart-total');
+      const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
+
+      const userButton = document.getElementById('user-button');
+      const loginModal = document.getElementById('login-modal');
+      
+      const profileButton = document.getElementById('profile-button');
+      const profileModal = document.getElementById('profile-modal');
+
+      const signupModal = document.getElementById('signup-modal');
+      const showSignupLink = document.getElementById('show-signup-link');
+      const showLoginLink = document.getElementById('show-login-link');
+
+      // Delivery/Map variables (Re-added, no API)
+      const deliveryAddressButton = document.getElementById('delivery-address-button');
+      const addressModal = document.getElementById('address-modal');
+      const confirmAddressBtn = document.getElementById('confirm-address-btn');
+      const addressInput = document.getElementById('address-input');
+      const deliveryAddressText = document.getElementById('delivery-address-text');
+      
+      const allModals = document.querySelectorAll('.modal');
+      const modalCloseBtns = document.querySelectorAll('.modal-close-btn');
+
+      const searchForm = document.getElementById('search-form');
+      const searchInput = document.getElementById('search-input');
+      const productCards = document.querySelectorAll('.product-card');
+
+      const categoryLinks = document.querySelectorAll('.category-link');
+      const productSectionHeadings = document.querySelectorAll('.product-section-heading');
+
+      function openCart() {
+        cartPanel.classList.remove('translate-x-full');
+        modalOverlay.classList.remove('hidden', 'opacity-0');
+        cartPanel.setAttribute('aria-hidden', 'false');
+        modalOverlay.setAttribute('aria-hidden', 'false');
+      }
+      function closeCart() {
+        cartPanel.classList.add('translate-x-full');
+        const anyModalOpen = document.querySelectorAll('.modal.flex').length > 0;
+        if (!anyModalOpen) {
+          modalOverlay.classList.add('opacity-0');
+          modalOverlay.setAttribute('aria-hidden', 'true');
+          setTimeout(() => modalOverlay.classList.add('hidden'), 300);
+        }
+        cartPanel.setAttribute('aria-hidden', 'true');
+      }
+
+      function openModal(modal) {
+        if (!modal) return;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        modalOverlay.classList.remove('hidden', 'opacity-0');
+        modalOverlay.setAttribute('aria-hidden', 'false');
+        modal.setAttribute('aria-hidden', 'false');
+      }
+      function closeModal(modal) {
+        if (!modal) return;
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        modal.setAttribute('aria-hidden', 'true');
+        const isCartOpen = !cartPanel.classList.contains('translate-x-full');
+        if (document.querySelectorAll('.modal.flex').length === 0 && !isCartOpen) {
+          modalOverlay.classList.add('opacity-0');
+          modalOverlay.setAttribute('aria-hidden', 'true');
+          setTimeout(() => modalOverlay.classList.add('hidden'), 300);
+        }
+      }
+      function closeAllModals() { allModals.forEach(closeModal); closeCart(); }
+
+      function addToCart(product) {
+        const existing = cart.find(i => i.id === product.id);
+        if (existing) existing.quantity++; else cart.push({ ...product, quantity: 1 });
+        updateCartUI();
+      }
+      function changeCartQuantity(id, delta) {
+        const item = cart.find(i => i.id === id);
+        if (!item) return;
+        item.quantity += delta;
+        if (item.quantity <= 0) cart = cart.filter(i => i.id !== id);
+        updateCartUI();
+      }
+      function removeFromCart(id) { cart = cart.filter(i => i.id !== id); updateCartUI(); }
+      function updateCartUI() {
+        cartItemsContainer.innerHTML = '';
+        if (cart.length === 0) {
+          cartItemsContainer.innerHTML = '<p class="text-gray-500 text-center py-4">Your cart is empty.</p>';
+        } else {
+          cart.forEach(item => {
+            const itemTotal = (item.price * item.quantity).toFixed(2);
+            cartItemsContainer.insertAdjacentHTML('beforeend', `
+              <div class="flex items-center space-x-4 mb-4" data-id="${item.id}">
+                <img src="${item.image}" alt="${item.name}" class="w-16 h-16 rounded-md object-cover" onerror="this.alt='${item.name}'; this.src='https://placehold.co/100x100/FCE7F3/EC4899?text=Item';">
+                <div class="flex-1">
+                  <h4 class="font-semibold text-sm">${item.name}</h4>
+                  <p class="text-gray-500 text-sm">฿${item.price} x ${item.quantity}</p>
+                  <div class="flex items-center mt-1">
+                    <button class="cart-decrease bg-pink-100 text-pink-700 w-6 h-6 rounded-full" data-id="${item.id}">-</button>
+                    <span class="mx-2 w-4 text-center">${item.quantity}</span>
+                    <button class="cart-increase bg-pink-100 text-pink-700 w-6 h-6 rounded-full" data-id="${item.id}">+</button>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <p class="font-bold text-pink-600">฿${itemTotal}</p>
+                  <button class="cart-remove-btn text-gray-400 hover:text-red-500 text-xs" data-id="${item.id}">Remove</button>
+                </div>
+              </div>
+            `);
+          });
+        }
+        const totalQty = cart.reduce((s, i) => s + i.quantity, 0);
+        const totalPrice = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+        cartCount.textContent = totalQty;
+        cartTotal.textContent = `฿${totalPrice.toFixed(2)}`;
+        cartCount.classList.toggle('hidden', totalQty === 0);
+      }
+
+      cartButton.addEventListener('click', e => { e.preventDefault(); openCart(); });
+      closeCartBtn.addEventListener('click', closeCart);
+      userButton.addEventListener('click', e => { e.preventDefault(); openModal(loginModal); });
+      profileButton.addEventListener('click', e => { e.preventDefault(); openModal(profileModal); });
+      
+      // Delivery/Map listeners (Re-added, no API)
+      deliveryAddressButton?.addEventListener('click', e => { e.preventDefault(); openModal(addressModal); });
+      confirmAddressBtn?.addEventListener('click', () => { 
+        const addr = addressInput.value.trim(); 
+        if (addr) deliveryAddressText.textContent = addr; 
+        closeModal(addressModal); 
+      });
+      
+      modalOverlay.addEventListener('click', closeAllModals);
+      modalCloseBtns.forEach(btn => btn.addEventListener('click', () => closeModal(btn.closest('.modal'))));
+
+      showSignupLink.addEventListener('click', e => { e.preventDefault(); closeModal(loginModal); openModal(signupModal); });
+      showLoginLink.addEventListener('click', e => { e.preventDefault(); closeModal(signupModal); openModal(loginModal); });
+
+      // --- Nav link click listener REMOVED ---
+      
+      // --- NEW Intersection Observer for Scrollspy ---
+      const sections = document.querySelectorAll('#home-section, #shop-by-category, #dairy-section');
+      const navLinkMap = {
+        'home-section': document.getElementById('nav-home'),
+        'shop-by-category': document.getElementById('nav-shop'),
+        'dairy-section': document.getElementById('nav-sale')
+      };
+      const allNavLinks = document.querySelectorAll('.nav-link');
+
+      const observerOptions = {
+        root: null, // viewport
+        rootMargin: '-100px 0px -50% 0px', // Trigger when in top half of viewport, offset by 100px sticky header
+        threshold: 0
+      };
+
+      const observerCallback = (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const targetId = entry.target.id;
+            const activeLink = navLinkMap[targetId];
+
+            // Remove active from all
+            allNavLinks.forEach(l => {
+              l.classList.remove('text-pink-600', 'border-b-2', 'border-pink-600', 'font-semibold');
+              l.classList.add('text-gray-600', 'font-medium');
+            });
+
+            // Add active to the correct one
+            if (activeLink) {
+              activeLink.classList.add('text-pink-600', 'border-b-2', 'border-pink-600', 'font-semibold');
+              activeLink.classList.remove('text-gray-600', 'font-medium');
+            }
+          }
+        });
+      };
+
+      const observer = new IntersectionObserver(observerCallback, observerOptions);
+      sections.forEach(sec => observer.observe(sec));
+      // --- END of new Intersection Observer ---
+
+
+      categoryLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+          const targetId = link.dataset.target;
+          const targetElement = document.getElementById(targetId);
+          if (targetElement) {
+            productSectionHeadings.forEach(h => h.classList.remove('highlight-section'));
+            targetElement.classList.add('highlight-section');
+          }
+        });
+      });
+
+      function filterProducts() {
+        const term = (searchInput?.value || '').toLowerCase();
+        let firstVisibleProduct = null;
+        
+        productCards.forEach(card => {
+          const name = card.dataset.name.toLowerCase();
+          const isVisible = name.includes(term);
+          card.style.display = isVisible ? 'block' : 'none';
+          
+          if (isVisible && !firstVisibleProduct) {
+            firstVisibleProduct = card;
+          }
+        });
+
+        if (firstVisibleProduct) {
+          firstVisibleProduct.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+      searchInput?.addEventListener('input', filterProducts);
+      searchForm?.addEventListener('submit', e => { e.preventDefault(); filterProducts(); });
+
+      // No change needed to this JS logic, the HTML data-image change fixed it.
+      addToCartButtons.forEach(btn => btn.addEventListener('click', () => {
+        const product = { id: btn.dataset.id, name: btn.dataset.name, price: parseFloat(btn.dataset.price), image: btn.dataset.image };
+        addToCart(product); openCart();
+      }));
+
+      cartItemsContainer.addEventListener('click', e => {
+        const t = e.target; const id = t.dataset.id; if (!id) return;
+        if (t.classList.contains('cart-increase')) changeCartQuantity(id, 1);
+        else if (t.classList.contains('cart-decrease')) changeCartQuantity(id, -1);
+        else if (t.classList.contains('cart-remove-btn')) removeFromCart(id);
+      });
+
+      const signupForm = document.getElementById('signup-form');
+      const signupEmail = document.getElementById('signup-email');
+      const signupPassword = document.getElementById('signup-password');
+      const signupPasswordConfirm = document.getElementById('signup-password-confirm');
+      const signupMessage = document.getElementById('signup-message');
+
+      signupForm?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        signupMessage.textContent = ''; signupMessage.classList.remove('text-red-500','text-green-500');
+        const email = signupEmail.value.trim();
+        const pwd = signupPassword.value; const pwd2 = signupPasswordConfirm.value;
+        if (pwd !== pwd2) { signupMessage.textContent = 'Passwords do not match!'; signupMessage.classList.add('text-red-500'); return; }
+        if (!email || !pwd) { signupMessage.textContent = 'Email and password are required.'; signupMessage.classList.add('text-red-500'); return; }
+        try {
+          const res = await fetch('http://localhost:3000/signup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password: pwd }) });
+          const data = await res.json();
+          if (data.success) {
+            signupMessage.textContent = data.message || 'Account created!'; signupMessage.classList.add('text-green-500'); signupForm.reset();
+            setTimeout(() => { closeModal(signupModal); openModal(loginModal); signupMessage.textContent=''; }, 1500);
+          } else {
+            signupMessage.textContent = data.message || 'Signup failed.'; signupMessage.classList.add('text-red-500');
+          }
+        } catch (err) {
+          console.error(err); signupMessage.textContent = 'An error occurred. Could not connect to server.'; signupMessage.classList.add('text-red-500');
+        }
+      });
+      
+      const loginForm = document.getElementById('login-form');
+      loginForm?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const loginMessage = document.getElementById('login-message');
+        loginMessage.textContent = 'Login logic is not implemented yet.';
+        loginMessage.classList.add('text-red-500');
+      });
+
+      updateCartUI();
+    });
+  </script>
+</body>
+</html>
