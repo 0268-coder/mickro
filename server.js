@@ -32,7 +32,11 @@ app.set('views', path.join(__dirname,"views"))
 
 //
 app.get("/",(req,res)=>{
-    res.render("Address.ejs")
+    res.render("register.ejs")
+})
+
+app.get("/register",(req,res)=>{
+    res.render("register.ejs")
 })
 
 const usersRouter = require("./routes/users")
