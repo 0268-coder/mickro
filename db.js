@@ -12,6 +12,6 @@ const connection = mysql.createPool({
     waitForConnections: true,
     connectionLimit: 10,   // how many connections to keep open
     queueLimit: 0          // 0 = unlimited queued requests
-});
+}).promise();
 
-module.exports = connection.promise();
+module.exports = connection;
