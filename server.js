@@ -3,6 +3,7 @@ const path = require('path')
 const app = express()
 const connection = require('./db')
 const session = require('express-session')
+const addressModel = require("./models/address");
 
 require('dotenv').config()
 
@@ -23,8 +24,19 @@ app.use(session({
 app.set('view engine', 'ejs')
 app.set('views', path.join(__dirname, "views"))
 
-app.get("/", (req,res)=>{
-    res.send("Home Page")
+//middleware to check if user is logged in
+function authenticateUser(req, res, next){
+    if(!req.session.user) {
+        return res.redirect("/login");
+    }
+    next();
+};
+
+app.get("/", authenticateUser, async (req,res)=>{
+
+    const userAddress = await addressModel.getAddress(req.session.user.id);
+
+    res.render("homepage", { userAddress, user: req.session.user })
 });
 
 const loginRouter = require("./routes/login");
