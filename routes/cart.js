@@ -81,7 +81,11 @@ router.delete("/:itemId", (req, res) => {
             req.session.cart = cart; // Re-assigning might be necessary depending on session store
             
             console.log("Product deleted from cart:", itemToDeleteId);
-            return res.sendStatus(204); // Success, No Content
+           return res.status(200).json({ 
+                newQty: newQty,
+                newTotal: newTotal.toFixed(2),
+                deleted: newQty === 0 // Flag to tell the client to remove the row
+            }); // Success, No Content
         } else {
             return res.status(404).send("Item not found in cart.");
         }
