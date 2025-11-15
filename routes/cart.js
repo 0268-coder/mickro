@@ -10,25 +10,58 @@ router
             const cart = req.session.cart || []
 
             if (cart.length === 0){
-                return res.render('cart',{cartItems: [],total: 0.00, message: "your cart is currently emtpy"})
+                return res.render('cart',{
+                    cartItems: [],
+                    total: 0.00, 
+                    subtotal: 0.00,
+                    deliveryFee: 15.00,
+                    message: "your cart is currently empty"
+                })
             }
-            let totalprice = 0
+            
+            let subtotal = 0
+            const cartItemsWithDetails = []
 
             for(const item of cart){
                 //change item.id to int
-                id = parseInt(item.id)
-                //get each product price
-                const [results] = await db.query("SELECT Product_Price FROM Product WHERE Product_ID = ?",id)
+                const id = parseInt(item.id)
+                //get each product details
+                const [results] = await db.query("SELECT * FROM Product WHERE Product_ID = ?",id)
 
-                //console.log(results[0].Product_Price+" "+item.qty)
-                //calculate total price
-                totalprice += results[0].Product_Price * item.qty    
+                if (results.length > 0) {
+                    const product = results[0]
+                    const itemTotal = parseFloat(product.Product_Price) * item.qty
+                    subtotal += itemTotal
+                    
+                    cartItemsWithDetails.push({
+                        id: item.id,
+                        name: item.name,
+                        qty: item.qty,
+                        price: parseFloat(product.Product_Price),
+                        product: product
+                    })
+                }
             }
 
-            return res.render('cart',{cartItems: [], total: totalprice})
+            const deliveryFee = 15.00
+            const total = subtotal + deliveryFee
+
+            return res.render('cart',{
+                cartItems: cartItemsWithDetails, 
+                subtotal: subtotal.toFixed(2),
+                deliveryFee: deliveryFee.toFixed(2),
+                total: total.toFixed(2)
+            })
         }
         catch(err){
             console.log("error occur during GET/cart",err)
+            return res.render('cart',{
+                cartItems: [],
+                total: 0.00,
+                subtotal: 0.00,
+                deliveryFee: 15.00,
+                message: "Error loading cart"
+            })
         }
 
     })
@@ -97,9 +130,13 @@ router.delete("/:itemId", async(req, res) => {
                 }
             }
             
+            const deliveryFee = 15.00
+            const totalWithDelivery = newTotal + deliveryFee
+            
             console.log("Product deleted from cart:", itemToDeleteId);
            return res.status(200).json({ 
-                newTotal: newTotal.toFixed(2),
+                newTotal: totalWithDelivery.toFixed(2),
+                subtotal: newTotal.toFixed(2)
             }); // Success, No Content
         } else {
             return res.status(404).send("Item not found in cart.");
@@ -142,9 +179,13 @@ router.put("/add/:itemID", async (req, res) => {
                 }
             }
 
+            const deliveryFee = 15.00
+            const totalWithDelivery = newTotal + deliveryFee
+
             return res.status(200).json({ 
                 newQty: existing.qty,
-                newTotal: newTotal.toFixed(2)
+                newTotal: totalWithDelivery.toFixed(2),
+                subtotal: newTotal.toFixed(2)
             });
 
         } else {
@@ -189,13 +230,17 @@ router.put("/remove/:itemID", async (req, res) => {
                 }
             }
 
+            const deliveryFee = 15.00
+            const totalWithDelivery = newTotal + deliveryFee
+
             // If the item was deleted, newQty should be 0 or handled gracefully
             const newQty = existing.qty > 0 ? existing.qty : 0; 
 
             // Return status 200 with updated data (or 204 if item was deleted and you skip data return)
             return res.status(200).json({ 
                 newQty: newQty,
-                newTotal: newTotal.toFixed(2),
+                newTotal: totalWithDelivery.toFixed(2),
+                subtotal: newTotal.toFixed(2),
                 deleted: newQty === 0 // Flag to tell the client to remove the row
             });
 

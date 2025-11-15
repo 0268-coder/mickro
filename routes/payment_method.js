@@ -9,9 +9,16 @@ router.get("/",async (req,res)=>{
         //set to locals so that ejs could call
 
         console.log('found method_type')
-        return res.render('payment_method',{get_payment_method: result})
+        return res.render('payment_method',{
+            get_payment_method: result,
+            payment_type: req.session.payment_type || null
+        })
     }catch(err){
         console.error("error select method",err)
+        return res.render('payment_method',{
+            get_payment_method: [],
+            payment_type: null
+        })
     }
 
 })

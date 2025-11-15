@@ -16,6 +16,16 @@ document.querySelectorAll('.decrease-btn').forEach(button => {
             // A. Handle Item Deletion
             if (data.deleted === true && itemElement) {
                 itemElement.remove(); // Remove the entire item row from the DOM
+                // Update cart count
+                const cartItems = document.querySelectorAll('.cart-item');
+                const cartCount = document.getElementById("cart-count");
+                if (cartCount) {
+                    cartCount.textContent = cartItems.length;
+                }
+                // If cart is empty, reload page
+                if (cartItems.length === 0) {
+                    window.location.reload();
+                }
             } 
             // B. Handle Quantity Decrease
             else if (itemElement) {
@@ -29,6 +39,10 @@ document.querySelectorAll('.decrease-btn').forEach(button => {
             const totalElement = document.getElementById("total-price");
             if (totalElement) {
                 totalElement.textContent = data.newTotal; 
+            }
+            const checkoutTotal = document.getElementById("checkout-total");
+            if (checkoutTotal) {
+                checkoutTotal.textContent = data.newTotal;
             }
         })
         .catch(err => {

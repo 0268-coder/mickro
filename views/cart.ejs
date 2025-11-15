@@ -1,24 +1,153 @@
-<%- layout('layout') %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mickro • Cart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        blush: '#FBD7D7',
+                        rose: '#FCE5E5',
+                        cherry: '#D94F5C',
+                        cherryDark: '#BE3B48',
+                        label: '#C64C5A',
+                        placeholder: '#F5B8B8'
+                    },
+                    fontFamily: {
+                        nunito: ['"Nunito"', 'sans-serif'],
+                        pacifico: ['"Pacifico"', 'cursive']
+                    },
+                    boxShadow: {
+                        soft: '0 20px 60px rgba(217, 79, 92, 0.15)'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Pacifico&display=swap" rel="stylesheet">
+</head>
+<body class="min-h-screen bg-blush font-nunito">
+    <!-- Top Navigation -->
+    <header class="sticky top-0 z-10 bg-blush">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <a href="/" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-rose hover:bg-rose/80 transition">
+                <svg class="w-6 h-6 text-cherry" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </a>
+        </div>
+    </header>
 
-<% cart.forEach(element => {%>
-    <div class="cart-item" id="item<%= element.id %>">
-        <p>cart name: <%= element.name %> Qauntity: 
-            <span class="quantity-display"><%= element.qty %></span>
-        </p>
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 pb-32">
+        <!-- Delivery Info Card -->
+        <div class="bg-white rounded-2xl shadow-md p-4 mb-4">
+            <a href="/address" class="flex items-center justify-between">
+                <h2 class="text-xl font-bold text-cherry">Delivery Info</h2>
+                <svg class="w-5 h-5 text-cherry" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                </svg>
+            </a>
+            <div class="mt-3 flex items-center gap-2 text-gray-600">
+                <svg class="w-5 h-5 text-cherry" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                </svg>
+                <span><%= typeof locals.userAddress !== 'undefined' ? locals.userAddress : 'Sirindhorn International Institute of Technology' %></span>
+            </div>
+        </div>
 
-        <button class="increase-btn" data-item-id="<%=element.id %>">+</button>
-        <button class="decrease-btn" data-item-id="<%=element.id %>">-</button>
-        <button class="delete-btn" data-item-id="<%= element.id %>">Delete</button>
+        <!-- Order Card -->
+        <div class="bg-white rounded-2xl shadow-md p-4 mb-4">
+            <h2 class="text-xl font-bold text-cherry mb-4">Order</h2>
+            
+            <% if (cartItems && cartItems.length > 0) { %>
+                <% cartItems.forEach(item => { %>
+                    <div class="cart-item mb-4 pb-4 border-b border-rose/30 last:border-0" id="item<%= item.id %>">
+                        <div class="flex gap-4">
+                            <!-- Product Image -->
+                            <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-rose/30 flex-shrink-0 overflow-hidden">
+                                <img src="https://via.placeholder.com/100x100/FBD7D7/D94F5C?text=<%= encodeURIComponent(item.name) %>" alt="<%= item.name %>" class="w-full h-full object-cover">
+                            </div>
+                            
+                            <!-- Product Details -->
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="flex-1 min-w-0">
+                                        <h3 class="text-cherry font-semibold text-sm sm:text-base truncate"><%= item.name %></h3>
+                                        <p class="text-gray-500 text-xs sm:text-sm mt-1"><%= item.price.toFixed(2) %> Baht</p>
+                                        <div class="flex items-center gap-2 mt-1">
+                                            <button class="decrease-btn w-6 h-6 bg-rose hover:bg-rose/80 text-cherry rounded-full flex items-center justify-center text-sm font-bold transition" data-item-id="<%= item.id %>">-</button>
+                                            <p class="text-gray-500 text-xs sm:text-sm">x<span class="quantity-display"><%= item.qty %></span></p>
+                                            <button class="increase-btn w-6 h-6 bg-rose hover:bg-rose/80 text-cherry rounded-full flex items-center justify-center text-sm font-bold transition" data-item-id="<%= item.id %>">+</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button class="delete-btn mt-2 bg-cherryDark hover:bg-cherry text-white text-xs px-3 py-1 rounded-lg transition" data-item-id="<%= item.id %>">
+                                    Remove
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+                
+                <!-- Price Breakdown -->
+                <div class="mt-4 pt-4 border-t border-rose/30">
+                    <div class="flex justify-end items-center gap-2 mb-2">
+                        <p class="text-gray-500 text-sm">Delivery fee</p>
+                        <p class="text-gray-500 text-sm"><span id="delivery-fee"><%= deliveryFee %></span> Baht</p>
+                    </div>
+                    <div class="flex justify-end items-center gap-2">
+                        <p class="text-cherry font-bold text-lg">Total</p>
+                        <p class="text-cherry font-bold text-lg"><span id="total-price"><%= total %></span> Baht</p>
+                    </div>
+                </div>
+            <% } else { %>
+                <p class="text-gray-500 text-center py-8"><%= message || 'Your cart is empty' %></p>
+            <% } %>
+        </div>
+
+        <!-- Payment Method Card -->
+        <div class="bg-white rounded-2xl shadow-md p-4 mb-4">
+            <a href="/payment_method" class="flex items-center justify-between">
+                <h2 class="text-xl font-bold text-cherry">Payment Method</h2>
+                <svg class="w-5 h-5 text-cherry" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                </svg>
+            </a>
+            <div class="mt-3 flex items-center gap-2 text-gray-600">
+                <svg class="w-5 h-5 text-cherry" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                </svg>
+                <span><%= typeof locals.payment_type !== 'undefined' && locals.payment_type ? locals.payment_type : 'Select Payment Method' %></span>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Check Out Button -->
+    <div class="fixed bottom-0 left-0 right-0 bg-rose border-t border-rose/50 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <form action="/order" method="POST" class="w-full">
+                <button type="submit" class="w-full bg-cherryDark hover:bg-cherry text-white font-bold py-4 px-6 rounded-2xl transition flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                            <span class="text-cherry font-bold text-sm" id="cart-count"><%= cartItems && cartItems.length > 0 ? cartItems.length : 0 %></span>
+                        </div>
+                        <span class="text-lg">Check Out</span>
+                    </div>
+                    <span class="text-lg">฿ <span id="checkout-total"><%= total || '0.00' %></span></span>
+                </button>
+            </form>
+        </div>
     </div>
-<%}); %>
 
-<a href="/payment_method">Payment Method:</a>
-<% if(payment_type){ %>
-    <%= payment_type %>
-<%}%>
-<br>
-<p></p>
-Total Price = <span id="total-price"><%= total %></span>
-<from href="/checkout" method="POST">
-    <input type="submit" name="checkout-btn" value="checkout">
-</from>
+    <script src="/delete_cart.js"></script>
+    <script src="/increase_btn.js"></script>
+    <script src="/decrease_btn.js"></script>
+</body>
+</html>

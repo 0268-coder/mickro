@@ -1,9 +1,121 @@
-<% layout('layout') %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mickro • Payment Method</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        blush: '#FBD7D7',
+                        rose: '#FCE5E5',
+                        cherry: '#D94F5C',
+                        cherryDark: '#BE3B48',
+                        label: '#C64C5A',
+                        placeholder: '#F5B8B8'
+                    },
+                    fontFamily: {
+                        nunito: ['"Nunito"', 'sans-serif'],
+                        pacifico: ['"Pacifico"', 'cursive']
+                    },
+                    boxShadow: {
+                        soft: '0 20px 60px rgba(217, 79, 92, 0.15)'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Pacifico&display=swap" rel="stylesheet">
+</head>
+<body class="min-h-screen bg-blush font-nunito">
+    <!-- Header -->
+    <header class="sticky top-0 z-10 bg-blush">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <a href="/cart" class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-rose hover:bg-rose/80 transition mb-4">
+                <svg class="w-6 h-6 text-cherry" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </a>
+            <h1 class="text-3xl font-bold text-cherry text-center">Payment Method</h1>
+        </div>
+    </header>
 
-<h2>Payment Type</h2>
-<% get_payment_method.forEach(method=>{ %>
-    <ul>
-        <li><a href="/payment_method/type/<%= method.Payment_Method_ID %>"><%= method.Method_Type %></a></li>
-    </ul>
-<% }) %>
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-32">
+        <!-- Linked Method Section -->
+        <section class="mb-8">
+            <h2 class="text-xl font-bold text-cherry mb-4">Linked Method</h2>
+            <div class="space-y-3">
+                <% get_payment_method.forEach(method => { 
+                    const currentPaymentType = typeof locals.payment_type !== 'undefined' ? locals.payment_type : (typeof payment_type !== 'undefined' ? payment_type : '');
+                    const isSelected = currentPaymentType === method.Method_Type || (method.Payment_Method_ID === 1 && !currentPaymentType);
+                    const isCash = method.Method_Type === 'Cash';
+                    const isCreditCard = method.Method_Type === 'Credit_card';
+                %>
+                    <a href="/payment_method/type/<%= method.Payment_Method_ID %>" class="block">
+                        <div class="bg-white rounded-2xl shadow-md p-4 flex items-center justify-between hover:shadow-lg transition cursor-pointer">
+                            <div class="flex items-center gap-4 flex-1">
+                                <!-- Icon -->
+                                <div class="w-12 h-12 flex items-center justify-center flex-shrink-0">
+                                    <% if (isCash) { %>
+                                        <!-- Cash Icon -->
+                                        <svg class="w-10 h-10 text-cherry" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                        </svg>
+                                    <% } else if (isCreditCard) { %>
+                                        <!-- Credit Card Icon -->
+                                        <svg class="w-10 h-10 text-cherry" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"/>
+                                            <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"/>
+                                        </svg>
+                                    <% } %>
+                                </div>
+                                
+                                <!-- Text -->
+                                <div class="flex-1 min-w-0">
+                                    <% if (isCash) { %>
+                                        <p class="text-cherry font-semibold text-lg">Cash</p>
+                                    <% } else if (isCreditCard) { %>
+                                        <p class="text-cherry font-semibold text-lg">0000-0000-1234-xx78</p>
+                                        <p class="text-gray-500 text-sm">Visa Card</p>
+                                    <% } else { %>
+                                        <p class="text-cherry font-semibold text-lg"><%= method.Method_Type %></p>
+                                    <% } %>
+                                </div>
+                            </div>
+                            
+                            <!-- Default Badge or Arrow -->
+                            <% if (isSelected) { %>
+                                <span class="bg-cherry text-white text-xs font-semibold px-3 py-1 rounded-lg">Default</span>
+                            <% } else { %>
+                                <svg class="w-5 h-5 text-cherry" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                                </svg>
+                            <% } %>
+                        </div>
+                    </a>
+                <% }); %>
+            </div>
+        </section>
+    </main>
 
+    <!-- Bottom Logo -->
+    <div class="fixed bottom-0 left-0 right-0 bg-blush pb-8 flex justify-center items-center">
+        <div class="flex items-center">
+            <!-- Left Circle (Darker Red) -->
+            <div class="w-16 h-16 bg-cherry rounded-full -mr-8 z-10 flex items-center justify-end pr-2">
+                <span class="text-white font-pacifico text-2xl">mic</span>
+            </div>
+            <!-- Right Circle (Light Pink) -->
+            <div class="w-16 h-16 bg-rose rounded-full z-0 flex items-center justify-start pl-2">
+                <span class="text-white font-pacifico text-2xl">ro</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
