@@ -9,6 +9,20 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body style="font-family: 'Poppins', sans-serif;" class="min-h-screen bg-gradient-to-b from-[#ffe5ec] to-[#ffd9e4] flex flex-col items-center">
+    <% if (typeof message !== 'undefined' && message) { %>
+    <div id="popup-message" class="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md px-4 transition-opacity duration-500 ease-in-out">
+        <div class="bg-[#d85a69] text-white rounded-2xl shadow-[0_8px_30px_rgba(216,90,105,0.4)] px-6 py-4 backdrop-blur-sm border border-[#d85a69]/20">
+            <div class="flex items-center gap-3">
+                <div class="flex-shrink-0 w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
+                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <p class="font-medium text-sm flex-1"><%= message %></p>
+            </div>
+        </div>
+    </div>
+    <% } %>
     <header class="flex flex-col items-center pt-12 pb-6">
         <img src="/images/@micro_logo.png" alt="Micro logo" class="w-36 md:w-48">
         <h1 class="mt-6 text-4xl font-semibold text-[#cc4a5a] tracking-wide">welcome</h1>
@@ -17,7 +31,7 @@
     <main class="w-full max-w-xl px-6 pb-16">
         <section class="bg-white/80 backdrop-blur-sm border border-white/60 shadow-[0_24px_60px_rgba(214,118,133,0.35)] rounded-[36px] p-8 md:p-10">
             <h2 class="text-center text-xl font-semibold text-[#cc4a5a]">Please enter your personal information</h2>
-            <form class="mt-8 space-y-5">
+            <form action="/register" method="POST" class="mt-8 space-y-5">
                 <div>
                     <label class="block text-sm font-semibold text-[#cc4a5a]" for="firstName">First Name</label>
                     <input id="firstName" name="firstName" type="text" placeholder="Enter your first name" class="mt-2 w-full rounded-full border border-white/60 bg-white px-5 py-3 text-sm text-[#a65866] placeholder-[#e3a9b3] shadow-inner focus:border-[#d96a79] focus:outline-none focus:ring-2 focus:ring-[#f4a0ad]">
@@ -60,5 +74,17 @@
             </form>
         </section>
     </main>
+    <script>
+        const popup = document.getElementById('popup-message');
+        if (popup) {
+            setTimeout(() => {
+                popup.style.opacity = '0';
+                popup.style.transition = 'opacity 0.5s ease-in-out';
+                setTimeout(() => {
+                    popup.remove();
+                }, 500);
+            }, 3000);
+        }
+    </script>
 </body>
 </html>

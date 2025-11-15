@@ -13,6 +13,10 @@ app.use(express.json());
 app.set('view engine', 'ejs')
 app.set('views', path.join(__dirname, "views"))
 
+app.get("/", (req,res)=>{
+    res.send("Home Page")
+});
+
 const loginRouter = require("./routes/login");
 const registerRouter = require("./routes/register");
 
