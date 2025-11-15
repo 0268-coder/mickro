@@ -6,7 +6,8 @@ const engine = require('ejs-mate')
 //require session
 const session = require('express-session')
 require('dotenv').config()
-
+//require database
+const db = require('./db')
 //enable session middleware
 app.use(session({
     secret: process.env.SECRET,
@@ -33,12 +34,6 @@ app.use((req,res,next)=>{
 app.set('view engine','ejs')
 app.set('views', path.join(__dirname,"views"))
 
-
-app.get("/",(req,res)=>{
-    req.session.views = (req.session.views || 0) + 1;
-    res.render("index",{hey: "World",session: req.session.views})
-})
-
 const usersRouter = require("./routes/users")
 const loginRouter = require("./routes/login")
 const orderRouter = require("./routes/order")
@@ -49,6 +44,7 @@ const paymentRouter = require("./routes/payment_method")
 app.use("/users", usersRouter)
 app.use("/login",loginRouter)
 app.use("/order",orderRouter)
+app.use("/",productRouter)
 app.use("/product",productRouter)
 app.use("/cart",cartRouter)
 app.use("/payment_method",paymentRouter)

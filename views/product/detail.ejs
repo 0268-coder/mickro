@@ -10,6 +10,7 @@
 </p>
 <form action="/cart" method="POST">
     <input type="hidden" value="<%= product.Product_ID %>" name="Product_ID">
+    <input type="hidden" value="<%= product.Product_Name %>" name = "Product_Name">
     <input type="hidden" value="<%= product.Product_Price %>" name="Product_Price">
     <label for="quantity">Quantity</label>
     <input type="number" name="quantity" value="1" min="1">

@@ -34,6 +34,7 @@ router
     })
     .post((req,res)=>{
         try{
+            const product_name = req.body.Product_Name
             const product_ID = parseInt(req.body.Product_ID)
             const quantity = parseInt(req.body.quantity)
             //initialize cart if it is not exist
@@ -53,15 +54,16 @@ router
                 req.session.cart.push({
                     id: product_ID,
                     qty: quantity,
+                    name: product_name
                 }) 
             }
             
             console.log("product add to cart",req.session.cart)
-            return res.redirect('/product')
+            return res.redirect('/')
         }
         catch(err){
             console.error("error",err.message)
-            return res.redirect('/product')
+            return res.redirect('/')
         }
     })
     
