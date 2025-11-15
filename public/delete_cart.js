@@ -6,10 +6,11 @@ document.querySelectorAll('.delete-btn').forEach(button => {
 
         fetch(url, { method: 'DELETE' })
         .then(response => {
-            if (response.status === 204) {
+            if (response.status === 200) {
                 console.log(`Item ${itemId} deleted.`);
                 // The correct class for the parent container is '.cart-item'
-                this.closest('.cart-item').remove();         
+                this.closest('.cart-item').remove();
+                return response.json();         
             } else {
                 alert('Failed to delete item.');
             }

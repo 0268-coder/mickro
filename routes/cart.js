@@ -66,7 +66,7 @@ router
     })
     
     
-router.delete("/:itemId", (req, res) => {
+router.delete("/:itemId", async(req, res) => {
     try {
         // 1. Get the item ID from the URL path
         const itemToDeleteId = parseInt(req.params.itemId) 
@@ -75,16 +75,29 @@ router.delete("/:itemId", (req, res) => {
         const cart = req.session.cart || [];
         const itemIndex = cart.findIndex(item => item.id === itemToDeleteId);
         
+        let newTotal = 0;
         if (itemIndex > -1) {
             // 3. Remove one item from the session cart array
             cart.splice(itemIndex, 1);
             req.session.cart = cart; // Re-assigning might be necessary depending on session store
+
+            for (const item of cart) {
+                // Ensure itemID is a number for the DB query
+                const itemID = parseInt(item.id, 10); 
+                const [results] = await db.query(
+                    "SELECT Product_Price FROM Product WHERE Product_ID = ?", 
+                    itemID
+                );
+
+                if (results.length > 0) {
+                    const price = results[0].Product_Price;
+                    newTotal += price * item.qty;
+                }
+            }
             
             console.log("Product deleted from cart:", itemToDeleteId);
            return res.status(200).json({ 
-                newQty: newQty,
                 newTotal: newTotal.toFixed(2),
-                deleted: newQty === 0 // Flag to tell the client to remove the row
             }); // Success, No Content
         } else {
             return res.status(404).send("Item not found in cart.");
