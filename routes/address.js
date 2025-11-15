@@ -1,14 +1,15 @@
 const express = require('express')
 const router = express.Router()
 const addressModel = require('../models/address');
+const { authenticateUser } = require('../middleware/auth');
 
-router.get("/", async (req,res)=>{
+router.get("/", authenticateUser, async (req,res)=>{
     const userId = req.session.user.id;
     const address = await addressModel.getAddress(userId);
     res.render("address", { address });
 })
 
-router.post("/", async (req,res)=>{
+router.post("/", authenticateUser, async (req,res)=>{
     const { address } = req.body;
     const userId = req.session.user.id;
     const result = await addressModel.updateAddress(address, userId);

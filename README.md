@@ -15,4 +15,5 @@
 `models` --> **dir** Directory containing MySQL queries files for each particular webpage.  
 `routes` --> **dir** Directory containing routes files to specific webpages separated from server.js  
 `views` --> **dir** Directory containing .ejs file html and css tailwind webpages.  
-`env_template` --> **file** environment template for initial setup
+`env_template` --> **file** environment template for initial setup  
+`middleware` --> **dir** middleware folder stored middleware such as autheticateUser and authenticateAdmin

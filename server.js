@@ -32,11 +32,22 @@ function authenticateUser(req, res, next){
     next();
 };
 
+function authenticateAdmin(req, res, next){
+    if(!req.session.user.isAdmin) {
+        return res.redirect("/login");
+    }
+    next();
+};
+
 app.get("/", authenticateUser, async (req,res)=>{
 
     const userAddress = await addressModel.getAddress(req.session.user.id);
 
     res.render("homepage", { userAddress, user: req.session.user })
+});
+
+app.get("/admin", authenticateUser, (req,res)=>{
+    res.render("adminpage");
 });
 
 const loginRouter = require("./routes/login");

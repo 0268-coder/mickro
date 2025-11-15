@@ -22,9 +22,13 @@ router.post("/", async (req,res)=>{
         return res.render("login", { message: "Invalid password" });
     }
 
-    req.session.user = { id: user.User_ID, username: user.Username };
+    req.session.user = { id: user.User_ID, username: user.Username, isAdmin: user.Status === 'admin' };
 
-    res.redirect("/");
+    if(user.Status === 'admin') {
+        res.redirect("/admin");
+    } else {
+        res.redirect("/");
+    }
 })
 
 module.exports = router;
