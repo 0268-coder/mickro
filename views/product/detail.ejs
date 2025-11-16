@@ -1,0 +1,21 @@
+<%- layout('layout') %>
+
+<h1><%= product.Product_Name %></h1>
+<p>
+    Price: <%= product.Product_Price %><br>
+    Length: <%= product.Length %><br>
+    Height: <%= product.Height %><br>
+    Width: <%= product.Width %><br>
+    Avg_Rating: <%= product.Avg_Rating %><br>
+</p>
+<form action="/cart" method="POST">
+    <input type="hidden" value="<%= product.Product_ID %>" name="Product_ID">
+    <input type="hidden" value="<%= product.Product_Name %>" name = "Product_Name">
+    <input type="hidden" value="<%= product.Product_Price %>" name="Product_Price">
+    <label for="quantity">Quantity</label>
+    <input type="number" name="quantity" value="1" min="1">
+    <input type="submit" value="add to cart">
+</form>
+<form action="/product" method="GET">
+    <input type="submit" value="back" name="submit">
+</form>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mickro • Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        blush: '#FBD7D7',
+                        rose: '#FCE5E5',
+                        cherry: '#D94F5C',
+                        cherryDark: '#BE3B48',
+                        label: '#C64C5A',
+                        placeholder: '#F5B8B8'
+                    },
+                    fontFamily: {
+                        nunito: ['"Nunito"', 'sans-serif'],
+                        pacifico: ['"Pacifico"', 'cursive']
+                    },
+                    boxShadow: {
+                        soft: '0 20px 60px rgba(217, 79, 92, 0.15)'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body class="min-h-screen bg-blush font-nunito">
+    <!-- Header -->
+    <header>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <!-- Location Section -->
+            <div class="mb-4">
+                <a href="/address" class="inline-flex items-center gap-2 text-cherry hover:text-cherryDark transition">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                    </svg>
+                    <span class="font-bold text-lg"><%= typeof userAddress !== 'undefined' && userAddress != "" ? userAddress : 'Select Location' %></span>
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                </a>
+            </div>
+            
+            <!-- Search Bar -->
+            <div class="relative flex items-center">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                    <svg class="h-5 w-5 text-cherry" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </div>
+                <div class="absolute inset-y-0 left-10 w-px bg-rose z-10"></div>
+                <input 
+                    type="text" 
+                    id="search-input"
+                    placeholder="Look what you want..." 
+                    value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>"
+                    class="flex-1 pl-14 pr-20 py-3 rounded-2xl bg-white border border-rose/30 text-cherry placeholder:text-placeholder focus:outline-none focus:ring-2 focus:ring-cherry focus:border-transparent"
+                >
+                <button 
+                    type="button"
+                    id="search-btn"
+                    class="absolute right-2 bg-cherry hover:bg-cherryDark text-white px-4 py-2 rounded-xl font-semibold transition z-10"
+                >
+                    Search
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24">
+        <!-- TYPES Section -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold text-cherry mb-6">TYPES</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 sm:gap-6">
+                <!-- Pork -->
+                <div class="flex flex-col items-center cursor-pointer hover:scale-105 transition">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white shadow-md flex items-center justify-center mb-2 overflow-hidden">
+                        <img src="https://via.placeholder.com/80x80/FBD7D7/D94F5C?text=Pork" alt="Pork" class="w-full h-full object-cover">
+                    </div>
+                    <span class="text-xs sm:text-sm font-semibold text-cherry text-center">Pork</span>
+                </div>
+                
+                <!-- Beef -->
+                <div class="flex flex-col items-center cursor-pointer hover:scale-105 transition">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white shadow-md flex items-center justify-center mb-2 overflow-hidden">
+                        <img src="https://via.placeholder.com/80x80/FBD7D7/D94F5C?text=Beef" alt="Beef" class="w-full h-full object-cover">
+                    </div>
+                    <span class="text-xs sm:text-sm font-semibold text-cherry text-center">Beef</span>
+                </div>
+                
+                <!-- Chicken -->
+                <div class="flex flex-col items-center cursor-pointer hover:scale-105 transition">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white shadow-md flex items-center justify-center mb-2 overflow-hidden">
+                        <img src="https://via.placeholder.com/80x80/FBD7D7/D94F5C?text=Chicken" alt="Chicken" class="w-full h-full object-cover">
+                    </div>
+                    <span class="text-xs sm:text-sm font-semibold text-cherry text-center">Chicken</span>
+                </div>
+                
+                <!-- Lamb -->
+                <div class="flex flex-col items-center cursor-pointer hover:scale-105 transition">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white shadow-md flex items-center justify-center mb-2 overflow-hidden">
+                        <img src="https://via.placeholder.com/80x80/FBD7D7/D94F5C?text=Lamb" alt="Lamb" class="w-full h-full object-cover">
+                    </div>
+                    <span class="text-xs sm:text-sm font-semibold text-cherry text-center">Lamb</span>
+                </div>
+                
+                <!-- Duck -->
+                <div class="flex flex-col items-center cursor-pointer hover:scale-105 transition">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white shadow-md flex items-center justify-center mb-2 overflow-hidden">
+                        <img src="https://via.placeholder.com/80x80/FBD7D7/D94F5C?text=Duck" alt="Duck" class="w-full h-full object-cover">
+                    </div>
+                    <span class="text-xs sm:text-sm font-semibold text-cherry text-center">Duck</span>
+                </div>
+                
+                <!-- Seafood -->
+                <div class="flex flex-col items-center cursor-pointer hover:scale-105 transition">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white shadow-md flex items-center justify-center mb-2 overflow-hidden">
+                        <img src="https://via.placeholder.com/80x80/FBD7D7/D94F5C?text=Seafood" alt="Seafood" class="w-full h-full object-cover">
+                    </div>
+                    <span class="text-xs sm:text-sm font-semibold text-cherry text-center">Seafood</span>
+                </div>
+                
+                <!-- Vegetable -->
+                <div class="flex flex-col items-center cursor-pointer hover:scale-105 transition">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white shadow-md flex items-center justify-center mb-2 overflow-hidden">
+                        <img src="https://via.placeholder.com/80x80/FBD7D7/D94F5C?text=Vegetable" alt="Vegetable" class="w-full h-full object-cover">
+                    </div>
+                    <span class="text-xs sm:text-sm font-semibold text-cherry text-center">Vegetable</span>
+                </div>
+                
+                <!-- Fruit -->
+                <div class="flex flex-col items-center cursor-pointer hover:scale-105 transition">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white shadow-md flex items-center justify-center mb-2 overflow-hidden">
+                        <img src="https://via.placeholder.com/80x80/FBD7D7/D94F5C?text=Fruit" alt="Fruit" class="w-full h-full object-cover">
+                    </div>
+                    <span class="text-xs sm:text-sm font-semibold text-cherry text-center">Fruit</span>
+                </div>
+                
+                <!-- Beverage -->
+                <div class="flex flex-col items-center cursor-pointer hover:scale-105 transition">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white shadow-md flex items-center justify-center mb-2 overflow-hidden">
+                        <img src="https://via.placeholder.com/80x80/FBD7D7/D94F5C?text=Beverage" alt="Beverage" class="w-full h-full object-cover">
+                    </div>
+                    <span class="text-xs sm:text-sm font-semibold text-cherry text-center">Beverage</span>
+                </div>
+                
+                <!-- Grocery -->
+                <div class="flex flex-col items-center cursor-pointer hover:scale-105 transition">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white shadow-md flex items-center justify-center mb-2 overflow-hidden">
+                        <img src="https://via.placeholder.com/80x80/FBD7D7/D94F5C?text=Grocery" alt="Grocery" class="w-full h-full object-cover">
+                    </div>
+                    <span class="text-xs sm:text-sm font-semibold text-cherry text-center">Grocery</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SUGGESTIONS Section - Products from Database -->
+        <section>
+            <h2 class="text-2xl font-bold text-cherry mb-6">SUGGESTIONS</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <% product.forEach(element => { %>
+                    <div class="bg-white rounded-2xl shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition">
+                        <a href="/product/<%= element.Product_ID %>">
+                            <div class="aspect-square bg-rose/30 flex items-center justify-center">
+                                <img src="https://via.placeholder.com/300x300/FBD7D7/D94F5C?text=<%= encodeURIComponent(element.Product_Name) %>" alt="<%= element.Product_Name %>" class="w-full h-full object-cover">
+                            </div>
+                            <div class="p-4">
+                                <p class="text-cherry font-semibold text-center mb-2"><%= element.Product_Name %></p>
+                                <p class="text-cherry font-bold text-center text-lg">$<%= element.Product_Price %></p>
+                            </div>
+                        </a>
+                        <!-- Add to Cart Form -->
+                        <form action="/cart" method="POST" class="px-4 pb-4">
+                            <input type="hidden" value="<%= element.Product_ID %>" name="Product_ID">
+                            <input type="hidden" value="<%= element.Product_Name %>" name="Product_Name">
+                            <input type="hidden" value="<%= element.Product_Price %>" name="Product_Price">
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="w-full bg-cherry hover:bg-cherryDark text-white font-semibold py-2 px-4 rounded-xl transition">
+                                Add to Cart
+                            </button>
+                        </form>
+                    </div>
+                <% }); %>
+            </div>
+        </section>
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-rose border-t border-rose/50 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-around items-center py-4">
+                <!-- Menu Icon -->
+                <a href="/" class="flex flex-col items-center text-cherry hover:text-cherryDark transition">
+                    <div class="w-8 h-8 flex items-center justify-center mb-1">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"/>
+                        </svg>
+                    </div>
+                </a>
+                
+                <!-- Clock Icon -->
+                <a href="#" class="flex flex-col items-center text-cherry hover:text-cherryDark transition">
+                    <div class="w-8 h-8 flex items-center justify-center mb-1">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                </a>
+                
+                <!-- Bell Icon -->
+                <a href="#" class="flex flex-col items-center text-cherry hover:text-cherryDark transition relative">
+                    <div class="w-8 h-8 flex items-center justify-center mb-1">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
+                        </svg>
+                    </div>
+                    <!-- Notification Ring Animation -->
+                    <div class="absolute top-0 right-1/4 w-2 h-2 bg-cherry rounded-full animate-pulse"></div>
+                </a>
+                
+                <!-- Cart Icon -->
+                <a href="/cart" class="flex flex-col items-center text-cherry hover:text-cherryDark transition">
+                    <div class="w-8 h-8 flex items-center justify-center mb-1">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
+                        </svg>
+                    </div>
+                </a>
+                
+                <!-- Profile Icon -->
+                <a href="/login" class="flex flex-col items-center text-cherry hover:text-cherryDark transition">
+                    <div class="w-8 h-8 flex items-center justify-center mb-1">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <script>
+        // Search functionality
+        const searchInput = document.getElementById('search-input');
+        const searchBtn = document.getElementById('search-btn');
+
+        function performSearch() {
+            const query = searchInput.value.trim();
+            if (query) {
+                window.location.href = `/product?search=${encodeURIComponent(query)}`;
+            } else {
+                window.location.href = '/';
+            }
+        }
+
+        // Search button click
+        searchBtn.addEventListener('click', performSearch);
+
+        // Enter key press in search input
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+    </script>
+</body>
+</html>

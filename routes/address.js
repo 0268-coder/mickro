@@ -14,6 +14,10 @@ router.post("/", authenticateUser, async (req,res)=>{
     const userId = req.session.user.id;
     const result = await addressModel.updateAddress(address, userId);
     const updatedAddress = await addressModel.getAddress(userId);
+    //store address in session
+    req.session.address = updatedAddress
+    //check
+    console.log(req.session.address)
     if(result) {
         res.render("address", { message: "Address added successfully", success: true, address: updatedAddress });
     } else {

@@ -8,15 +8,18 @@ router.get("/",(req,res)=>{
 })
 
 router.post("/", async (req,res)=>{
-    const { username, password } = req.body;
-
+    const { username, password} = req.body
+    
     const user = await loginModel.getUserLogin(username);
+    //from buffer to string
+    const strPassword = bufferToString(user.Password)
     if(!user) {
         return res.render("login", { message: "Invalid username" });
     }
 
+    
     //compare password hash
-    const isPasswordValid = await bcrypt.compare(password, user.Password);
+    const isPasswordValid = await bcrypt.compare(password, strPassword);
     
     if(!isPasswordValid) {
         return res.render("login", { message: "Invalid password" });
@@ -30,5 +33,14 @@ router.post("/", async (req,res)=>{
         res.redirect("/");
     }
 })
+
+function bufferToString(data) {
+    if (data && Buffer.isBuffer(data)) {
+        // Convert the Buffer object to a standard UTF-8 string
+        return data.toString('utf8');
+    }
+    // Return the data as-is if it's already a string or null/undefined
+    return data;
+}
 
 module.exports = router;

@@ -1,28 +1,37 @@
 const express = require('express')
 const path = require('path')
 const app = express()
-const connection = require('./db')
-const session = require('express-session')
 const addressModel = require("./models/address");
 
+//require to use layout
+const engine = require('ejs-mate')
+//require session
+const session = require('express-session')
 require('dotenv').config()
+//use ejs and views at directiory/views
+app.set('view engine', 'ejs')
+app.set('views', path.join(__dirname, "views"))
 
-
+//for layout.ejs
+app.engine('ejs',engine)
 //setup
 app.use(express.static("public"))
 app.use(express.urlencoded({extended: true}))
 app.use(express.json());
-
+//enable session
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: { maxAge: 1000 * 60 * 60 * 24 }
 }));
+app.use((req,res,next)=>{
+    res.locals.cart = req.session.cart || []
+    res.locals.payment_type = req.session.payment_type || ""
+    res.locals.userAddress = req.session.address || ""
+    next()
+})
 
-//use ejs and views at directiory/views
-app.set('view engine', 'ejs')
-app.set('views', path.join(__dirname, "views"))
 
 //middleware to check if user is logged in
 function authenticateUser(req, res, next){
@@ -39,24 +48,34 @@ function authenticateAdmin(req, res, next){
     next();
 };
 
+
+const registerRouter = require("./routes/register");
+const loginRouter = require("./routes/login")
+const addressRouter = require("./routes/address");
+const orderRouter = require("./routes/order")
+const productRouter = require("./routes/product")
+const cartRouter = require("./routes/cart")
+const paymentRouter = require("./routes/payment_method")
+
+app.use("/login",loginRouter)
+app.use("/register", registerRouter);
+app.use("/address", addressRouter);
+app.use("/order",orderRouter)
+app.use("/",productRouter)
+app.use("/product",productRouter)
+app.use("/cart",cartRouter)
+app.use("/payment_method",paymentRouter)
+
 app.get("/", authenticateUser, async (req,res)=>{
 
     const userAddress = await addressModel.getAddress(req.session.user.id);
 
-    res.render("homepage", { userAddress, user: req.session.user })
+    res.render("product/product", { userAddress, user: req.session.user })
 });
 
 app.get("/admin", authenticateUser, (req,res)=>{
     res.render("adminpage");
 });
-
-const loginRouter = require("./routes/login");
-const registerRouter = require("./routes/register");
-const addressRouter = require("./routes/address");
-
-app.use("/login",loginRouter)
-app.use("/register", registerRouter);
-app.use("/address", addressRouter);
 
 app.listen(process.env.PORT || 3000,()=>{
     console.log("server listen on port " + process.env.PORT)
