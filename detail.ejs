@@ -1,0 +1,54 @@
+<%- layout('layout') %>
+
+<section>
+  <% 
+    // Files live directly under /public, so we do not use the /images prefix.
+    let imgPath = "/logo.png"; // fallback image that definitely exists
+    const name = (product.Product_Name || "").toLowerCase();
+
+    if (name.includes("seabass") || name.includes("fish")) {
+      imgPath = "/seabass.png";
+    } else if (name.includes("pork")) {
+      imgPath = "/pork-loin.png";
+    } else if (name.includes("morning glory") || name.includes("pak boong") || name.includes("kangkung")) {
+      imgPath = "/morning-glory.png";
+    } else if (name.includes("rice") || name.includes("jasmine")) {
+      imgPath = "/jasmine-rice.png";
+    } else if (name.includes("egg")) {
+      imgPath = "/cage-free-eggs.png";
+    }
+  %>
+
+  <div style="display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:24px;align-items:start;">
+    <div class="product-image-wrap" style="height:260px;">
+      <img src="<%= imgPath %>" alt="<%= product.Product_Name %>">
+    </div>
+
+    <div>
+      <h1 class="page-title"><%= product.Product_Name %></h1>
+      <p class="page-subtitle">Fresh and carefully selected for your Micro basket.</p>
+
+      <p class="product-price" style="margin-bottom:10px;">฿<%= product.Product_Price %></p>
+
+      <ul style="font-size:0.9rem;color:#4b5563;margin-bottom:14px;line-height:1.5;">
+        <li>Length: <%= product.Length %></li>
+        <li>Width: <%= product.Width %></li>
+        <li>Height: <%= product.Height %></li>
+        <li>Average Rating: <%= product.Avg_Rating %> ★</li>
+      </ul>
+
+      <form action="/cart" method="POST" class="add-to-cart-form">
+        <input type="hidden" name="Product_ID" value="<%= product.Product_ID %>">
+        <input type="hidden" name="Product_Name" value="<%= product.Product_Name %>">
+        <input type="hidden" name="Product_Price" value="<%= product.Product_Price %>">
+
+        <div class="form-row">
+          <label for="detail-qty">Quantity</label>
+          <input id="detail-qty" type="number" name="quantity" value="1" min="1">
+        </div>
+
+        <button type="submit" class="btn-primary">Add to Cart</button>
+      </form>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,88 @@
+<%- layout('layout') %>
+
+<section>
+  <h1 class="page-title">Your Cart</h1>
+  <p class="page-subtitle">Adjust quantities or remove items before checkout.</p>
+
+  <div style="display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:22px;">
+    <div style="background:#fff;border-radius:18px;padding:14px 14px 4px;box-shadow:0 10px 28px rgba(248,113,113,0.16);">
+      <% if (cart.length === 0) { %>
+        <p style="font-size:0.95rem;color:#6b7280;">Your cart is empty.</p>
+      <% } else { %>
+        <% cart.forEach(element => { %>
+            <% 
+                // Files live directly in /public, so no /images prefix.
+                let imgPath = "/logo.png"; // fallback image that definitely exists
+                const name = (element.Product_Name || element.name || "").toLowerCase();
+
+                if (name.includes("seabass") || name.includes("fish")) {
+                    imgPath = "/seabass.png";
+                } else if (name.includes("pork")) {
+                    imgPath = "/pork-loin.png";
+                } else if (name.includes("morning glory") || name.includes("pak boong") || name.includes("kangkung")) {
+                    imgPath = "/morning-glory.png";
+                } else if (name.includes("rice") || name.includes("jasmine")) {
+                    imgPath = "/jasmine-rice.png";
+                } else if (name.includes("egg")) {
+                    imgPath = "/cage-free-eggs.png";
+                }     
+            %>
+
+          <div class="cart-item" id="item<%= element.id %>" style="display:grid;grid-template-columns:70px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px dashed rgba(248,113,113,0.3);">
+            <div class="product-image-wrap" style="height:70px;">
+              <img src="<%= imgPath %>" alt="<%= element.name %>">
+            </div>
+
+            <div>
+              <div style="font-weight:600;margin-bottom:4px;"><%= element.name %></div>
+              <div style="font-size:0.85rem;color:#6b7280;">
+                Qty:
+                <span class="quantity-display"><%= element.qty %></span>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+              <div style="display:flex;gap:6px;align-items:center;">
+                <button class="decrease-btn" data-item-id="<%= element.id %>" style="background:#fce7f3;border:none;width:32px;height:32px;border-radius:8px;font-size:1.2rem;color:#be185d;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+                  −
+                </button>
+                <button class="increase-btn" data-item-id="<%= element.id %>" style="background:#fde6ef;border:none;width:32px;height:32px;border-radius:8px;font-size:1.2rem;color:#be185d;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+                  +
+                </button>
+              </div>
+              <button class="delete-btn" data-item-id="<%= element.id %>" style="background:#ffe4e6;border:none;padding:6px 14px;border-radius:10px;font-size:0.85rem;color:#e11d48;font-weight:600;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+                Remove
+              </button>
+            </div>
+          </div>
+        <% }); %>
+      <% } %>
+    </div>
+
+    <aside class="cart-summary-card" style="background:#fff;border-radius:18px;padding:16px;box-shadow:0 12px 30px rgba(248,113,113,0.16);">
+      <div class="summary-row">
+        <span class="summary-label">Payment Method</span>
+        <span class="summary-value">
+          <% if (payment_type) { %>
+            <%= payment_type %>
+          <% } else { %>
+            <span style="color:#9ca3af;">Not selected</span>
+          <% } %>
+        </span>
+      </div>
+
+      <div style="margin:8px 0 14px;">
+        <a href="/payment_method" class="btn-primary" style="display:inline-block;width:100%;text-align:center;background:transparent;color:#db2777;border:1px solid #fecaca;box-shadow:none;">Choose payment</a>
+      </div>
+
+      <div class="summary-row summary-total">
+        <span>Total</span>
+        <span>฿<span id="total-price"><%= total %></span></span>
+      </div>
+
+      <form action="/checkout" method="POST" style="margin-top:8px;">
+        <button type="submit" name="checkout-btn" class="btn-primary">Checkout</button>
+      </form>
+    </aside>
+  </div>
+</section>

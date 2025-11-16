@@ -1,0 +1,57 @@
+<%- layout('layout') %>
+
+<section>
+  <h1 class="page-title">Shop All Products</h1>
+  <p class="page-subtitle">
+    Fresh fish, meat, vegetables, rice, and eggs — delivered to your door.
+  </p>
+
+  <ul class="product-list-grid">
+    <% product.forEach(element => { %>
+      <%
+        let imgPath = "/logo.png"; // fallback that actually exists
+        const name = (element.Product_Name || "").toLowerCase();
+
+        if (name.includes("jasmine") || name.includes("rice")) {
+          imgPath = "/jasmine-rice.png";
+        } else if (name.includes("egg")) {
+          imgPath = "/cage-free-eggs.png";
+        } else if (name.includes("morning glory") || name.includes("pak boong")) {
+          imgPath = "/morning-glory.png";
+        } else if (name.includes("pork loin")) {
+          imgPath = "/pork-loin.png";
+        } else if (name.includes("seabass")) {
+          imgPath = "/seabass.png";
+        }
+      %>
+
+      <li class="product-card">
+        <div class="product-image-wrap">
+          <img src="<%= imgPath %>" alt="<%= element.Product_Name %>">
+        </div>
+
+        <div class="product-name">
+          <a href="/product/<%= element.Product_ID %>"><%= element.Product_Name %></a>
+        </div>
+
+        <div class="product-meta">
+          <span>Product ID: <%= element.Product_ID %></span>
+          <span class="product-price">฿<%= element.Product_Price %></span>
+        </div>
+
+        <form action="/cart" method="POST" class="add-to-cart-form">
+          <input type="hidden" name="Product_ID" value="<%= element.Product_ID %>">
+          <input type="hidden" name="Product_Name" value="<%= element.Product_Name %>">
+          <input type="hidden" name="Product_Price" value="<%= element.Product_Price %>">
+
+          <div class="form-row">
+            <label for="qty-<%= element.Product_ID %>">Quantity</label>
+            <input id="qty-<%= element.Product_ID %>" type="number" name="quantity" value="1" min="1">
+          </div>
+
+          <button type="submit" class="btn-primary">Add to Cart</button>
+        </form>
+      </li>
+    <% }); %>
+  </ul>
+</section>
