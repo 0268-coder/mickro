@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mickro • Review Submitted</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        blush: '#FBD7D7',
+                        rose: '#FCE5E5',
+                        cherry: '#D94F5C',
+                        cherryDark: '#BE3B48',
+                        label: '#C64C5A',
+                        placeholder: '#F5B8B8'
+                    },
+                    fontFamily: {
+                        nunito: ['"Nunito"', 'sans-serif'],
+                        pacifico: ['"Pacifico"', 'cursive']
+                    },
+                    boxShadow: {
+                        soft: '0 20px 60px rgba(217, 79, 92, 0.15)'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Pacifico&display=swap" rel="stylesheet">
+</head>
+<body class="min-h-screen bg-blush font-nunito">
+    <!-- Top Navigation -->
+    <header class="sticky top-0 bg-blush">
+        <div class="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
+            <a href="/" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-rose hover:bg-rose/80 transition">
+                <svg class="w-6 h-6 text-cherry" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </a>
+            <h1 class="text-lg sm:text-xl font-bold text-cherry">Review Submitted</h1>
+            <div class="w-10"></div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-3xl shadow-soft p-6 sm:p-8 text-center mb-6">
+            <div class="mx-auto mb-4 w-16 h-16 rounded-full bg-rose flex items-center justify-center">
+                <svg class="w-10 h-10 text-cherry" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <h2 class="text-2xl font-extrabold text-cherry mb-2">
+                Thank you for your review!
+            </h2>
+            <p class="text-gray-600 text-sm sm:text-base">
+                Your feedback helps us make Mickro even better 💕
+            </p>
+            <% if (orderId) { %>
+                <p class="mt-2 text-xs text-gray-400">
+                    For Order #<%= orderId %>
+                </p>
+            <% } %>
+        </div>
+
+        <!-- Review Summary -->
+        <div class="bg-white rounded-2xl shadow-md p-5 space-y-4">
+            <div>
+                <h3 class="text-lg font-bold text-cherry mb-2">Your Rating</h3>
+                <div class="flex items-center justify-center gap-1 text-2xl">
+                    <% for (let i = 1; i <= 5; i++) { %>
+                        <% if (i <= parseInt(rating || 0)) { %>
+                            <span class="text-cherry">★</span>
+                        <% } else { %>
+                            <span class="text-gray-300">★</span>
+                        <% } %>
+                    <% } %>
+                    <span class="ml-2 text-sm text-gray-600">
+                        (<%= rating %> / 5)
+                    </span>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-lg font-bold text-cherry mb-2">Your Comment</h3>
+                <div class="bg-rose/20 border border-rose/40 rounded-xl px-4 py-3 text-sm text-gray-700 text-left whitespace-pre-line">
+                    <%= comment && comment.trim().length > 0 ? comment : 'No additional comment.' %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Single Button -->
+        <div class="mt-6 flex justify-center">
+            <a 
+                href="/" 
+                class="inline-flex items-center justify-center gap-2 bg-cherryDark hover:bg-cherry text-white font-bold py-3 px-8 rounded-2xl transition text-sm sm:text-base"
+            >
+                <span>Back to Home</span>
+            </a>
+        </div>
+    </main>
+</body>
+</html>

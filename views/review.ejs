@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mickro • Review</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind color config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        blush: '#FBD7D7',
+                        rose: '#FCE5E5',
+                        cherry: '#D94F5C',
+                        cherryDark: '#BE3B48',
+                        label: '#C64C5A',
+                        placeholder: '#F5B8B8'
+                    },
+                    fontFamily: {
+                        nunito: ['"Nunito"', 'sans-serif'],
+                        pacifico: ['"Pacifico"', 'cursive']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .star {
+            cursor: pointer;
+            transition: color 0.2s ease-in-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-blush font-nunito">
+
+    <!-- Top Navigation -->
+    <header class="sticky top-0 z-10 bg-blush">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex items-center">
+            <a href="/" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-rose hover:bg-rose/80 transition">
+                <svg class="w-6 h-6 text-cherry" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </a>
+            <h1 class="ml-4 text-xl font-bold text-cherry">
+                Review Order #<%= orderId %>
+            </h1>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 py-6">
+
+        <% if (message) { %>
+            <div class="mb-4 bg-white border border-cherryDark rounded-xl px-4 py-3 text-cherryDark shadow">
+                <%= message %>
+            </div>
+        <% } %>
+
+        <form action="/review/<%= orderId %>" method="POST" 
+              class="bg-white rounded-2xl shadow-md p-6 space-y-8">
+
+            <!-- STAR RATING -->
+            <div class="text-center">
+                <h2 class="text-lg font-bold text-cherry mb-3">Rate your experience</h2>
+
+                <div id="stars" class="text-4xl flex justify-center gap-3 text-gray-300">
+                    <% for (let i = 1; i <= 5; i++) { %>
+                        <span class="star" data-value="<%= i %>">★</span>
+                    <% } %>
+                </div>
+
+                <input type="hidden" id="rating" name="rating" value="<%= rating || '' %>">
+            </div>
+
+            <!-- COMMENT BOX -->
+            <div>
+                <label class="block text-cherry font-semibold mb-2">Your review</label>
+                <textarea
+                    name="comment"
+                    rows="4"
+                    class="w-full rounded-xl border border-rose/50 bg-rose/20 px-3 py-2 text-sm focus:ring-2 focus:ring-cherryDark"
+                    placeholder="Share your thoughts..."
+                ><%= comment %></textarea>
+            </div>
+
+            <!-- SUBMIT BUTTON -->
+            <button 
+                type="submit"
+                class="w-full bg-cherryDark hover:bg-cherry transition text-white font-bold text-lg py-3 rounded-xl shadow">
+                Submit Review
+            </button>
+        </form>
+
+    </main>
+
+    <script>
+        const stars = document.querySelectorAll('.star');
+        const ratingInput = document.getElementById('rating');
+
+        // highlight stars on hover and click
+        stars.forEach(star => {
+            star.addEventListener('mouseenter', () => {
+                highlightStars(star.dataset.value);
+            });
+
+            star.addEventListener('mouseleave', () => {
+                highlightStars(ratingInput.value || 0);
+            });
+
+            star.addEventListener('click', () => {
+                ratingInput.value = star.dataset.value;
+                highlightStars(star.dataset.value);
+            });
+        });
+
+        // function to color stars
+        function highlightStars(value) {
+            stars.forEach(star => {
+                if (parseInt(star.dataset.value) <= value) {
+                    star.style.color = '#D94F5C'; // cherry
+                } else {
+                    star.style.color = '#e5e7eb'; // neutral
+                }
+            });
+        }
+
+        // restore rating if editing
+        if (ratingInput.value) {
+            highlightStars(parseInt(ratingInput.value));
+        }
+    </script>
+
+</body>
+</html>

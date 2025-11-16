@@ -9,13 +9,12 @@ router.get("/",(req,res)=>{
 
 router.post("/", async (req,res)=>{
     const { username, password} = req.body
-    
     const user = await loginModel.getUserLogin(username);
     //from buffer to string
-    const strPassword = bufferToString(user.Password)
     if(!user) {
         return res.render("login", { message: "Invalid username" });
     }
+    const strPassword = bufferToString(user.Password)
 
     
     //compare password hash

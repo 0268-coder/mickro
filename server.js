@@ -2,7 +2,7 @@ const express = require('express')
 const path = require('path')
 const app = express()
 const addressModel = require("./models/address");
-
+const db = require('./db')
 //require to use layout
 const engine = require('ejs-mate')
 //require session
@@ -35,6 +35,7 @@ app.use((req,res,next)=>{
 
 //middleware to check if user is logged in
 function authenticateUser(req, res, next){
+    console.log("funciton authenticateUser")
     if(!req.session.user) {
         return res.redirect("/login");
     }
@@ -52,25 +53,31 @@ function authenticateAdmin(req, res, next){
 const registerRouter = require("./routes/register");
 const loginRouter = require("./routes/login")
 const addressRouter = require("./routes/address");
-const orderRouter = require("./routes/order")
 const productRouter = require("./routes/product")
 const cartRouter = require("./routes/cart")
 const paymentRouter = require("./routes/payment_method")
+const checkoutRouter = require("./routes/checkout")
+const reviewRouter = require("./routes/review")
+const orderRouter = require("./routes/order")
 
 app.use("/login",loginRouter)
 app.use("/register", registerRouter);
 app.use("/address", addressRouter);
 app.use("/order",orderRouter)
-app.use("/",productRouter)
 app.use("/product",productRouter)
 app.use("/cart",cartRouter)
 app.use("/payment_method",paymentRouter)
+app.use("/checkout",checkoutRouter)
+app.use("/review",reviewRouter)
+app.use("/order",orderRouter)
 
 app.get("/", authenticateUser, async (req,res)=>{
 
-    const userAddress = await addressModel.getAddress(req.session.user.id);
+    const userAddr = await addressModel.getAddress(req.session.user.id);
+    req.session.address = userAddr
+    const [allProducts] = await db.query('SELECT * FROM Product')
 
-    res.render("product/product", { userAddress, user: req.session.user })
+    res.render("product/product", { userAddress: userAddr, user: req.session.user,product: allProducts })
 });
 
 app.get("/admin", authenticateUser, (req,res)=>{

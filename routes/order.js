@@ -1,33 +1,25 @@
+// routes/order.js
 const express = require('express')
 const router = express.Router()
 const db = require('../db')
 
-router.get('/', async (req, res) => {
-  const [rows] = await db.query('SELECT * FROM Product');
-  res.json(rows);
-});
+// POST /order/:orderId/received
+router.post('/:orderId/received', async (req, res) => {
+    const orderId = parseInt(req.params.orderId, 10)
 
-//confirm order
-router.post('/', async (req,res) =>{
-    try{
-      const sql = `INSERT INTO Order_Transaction(User_ID, Coupon_ID, Payment_Method_ID, Total_price, Status) VALUES (?,?,?,?,?)`;
-      //test value
-      const value = [2,1,1,10,"Pending"]
-      //insert into query
-      const [result] = await db.query(sql,value)
+    try {
+        // If you have a Status column, you can update it:
+        // await db.query(
+        //   "UPDATE Orders SET Status = 'RECEIVED' WHERE Order_ID = ?",
+        //   [orderId]
+        // )
 
-      return res.redirect(201).json({
-        message:"1 record to order"
-      })
-    }
-    //if fails
-    catch(err){
-      console.error('Database query error:',err)
-
-      return res.status(500).json({
-        error: 'failed to insert to order_transaction',
-        details: err.message
-      })
+        // After confirming received, send to review page:
+        return res.redirect(`/review/${orderId}`)
+        // or: return res.redirect('/')
+    } catch (err) {
+        console.error('Error marking order as received:', err)
+        return res.status(500).send('Could not confirm order received.')
     }
 })
 

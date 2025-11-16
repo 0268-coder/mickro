@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mickro • Order Placed</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        blush: '#FBD7D7',
+                        rose: '#FCE5E5',
+                        cherry: '#D94F5C',
+                        cherryDark: '#BE3B48',
+                        label: '#C64C5A',
+                        placeholder: '#F5B8B8'
+                    },
+                    fontFamily: {
+                        nunito: ['"Nunito"', 'sans-serif'],
+                        pacifico: ['"Pacifico"', 'cursive']
+                    },
+                    boxShadow: {
+                        soft: '0 20px 60px rgba(217, 79, 92, 0.15)'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Pacifico&display=swap" rel="stylesheet">
+</head>
+<body class="min-h-screen bg-blush font-nunito">
+    <!-- Top Navigation -->
+    <header class="sticky top-0 z-10 bg-blush">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+            <!-- Back to Home -->
+            <a href="/" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-rose hover:bg-rose/80 transition">
+                <svg class="w-6 h-6 text-cherry" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </a>
+            <h1 class="text-lg sm:text-xl font-bold text-cherry">Order Placed</h1>
+            <div class="w-10"></div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32">
+        <!-- Success Card -->
+        <div class="bg-white rounded-3xl shadow-soft p-6 sm:p-8 text-center mb-6">
+            <div class="mx-auto mb-4 w-16 h-16 rounded-full bg-rose flex items-center justify-center">
+                <svg class="w-10 h-10 text-cherry" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <h2 class="text-2xl font-extrabold text-cherry mb-1">
+                Thank you<% if (typeof fullName !== 'undefined' && fullName) { %>, <%= fullName %><% } %>!
+            </h2>
+            <p class="text-gray-600 text-sm sm:text-base mb-3">
+                Your order has been placed successfully.
+            </p>
+            <p class="text-sm text-gray-500">
+                Order No. <span class="font-semibold text-cherryDark">#<%= orderId %></span>
+            </p>
+        </div>
+
+        <!-- Order Details -->
+        <div class="space-y-4">
+            <!-- Delivery and Total -->
+            <div class="bg-white rounded-2xl shadow-md p-4 sm:p-5">
+                <h3 class="text-lg font-bold text-cherry mb-3">Order Summary</h3>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between text-gray-600">
+                        <span>Subtotal</span>
+                        <span>฿ <%= subtotal %></span>
+                    </div>
+                    <div class="flex justify-between text-gray-600">
+                        <span>Delivery fee</span>
+                        <span>฿ <%= deliveryFee %></span>
+                    </div>
+                    <div class="flex justify-between items-center pt-2 border-t border-rose/30 mt-2">
+                        <span class="text-cherry font-semibold">Total</span>
+                        <span class="text-cherry font-extrabold text-lg">
+                            ฿ <%= total %>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Delivery Address -->
+            <div class="bg-white rounded-2xl shadow-md p-4 sm:p-5">
+                <h3 class="text-lg font-bold text-cherry mb-3">Delivery Address</h3>
+                <div class="flex items-start gap-2 text-sm text-gray-700">
+                    <svg class="w-5 h-5 mt-0.5 text-cherry" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                    </svg>
+                    <div>
+                        <% if (typeof fullName !== 'undefined' && fullName) { %>
+                            <p class="font-semibold text-cherryDark mb-0.5"><%= fullName %></p>
+                        <% } %>
+                        <p class="leading-relaxed">
+                            <%= typeof address !== 'undefined' ? address : '' %>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Have you received your order? -->
+            <div class="bg-white rounded-2xl shadow-md p-4 sm:p-5">
+                <h3 class="text-lg font-bold text-cherry mb-2">
+                    Have you received your order?
+                </h3>
+                <p class="text-sm text-gray-600 mb-4">
+                    Once your package arrives, please confirm that you have received it.
+                </p>
+
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <!-- YES: I have received it -->
+                    <form 
+                        action="/order/<%= orderId %>/received" 
+                        method="POST" 
+                        class="flex-1"
+                    >
+                        <input type="hidden" name="orderId" value="<%= orderId %>">
+                        <button 
+                            type="submit" 
+                            class="w-full bg-cherryDark hover:bg-cherry text-white font-bold py-3 px-4 rounded-2xl transition flex items-center justify-center gap-2"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            <span>Yes, I have received it</span>
+                        </button>
+                    </form>
+
+                    <!-- NOT YET / Back to Home -->
+                    <a 
+                        href="/" 
+                        class="flex-1 inline-flex items-center justify-center gap-2 border border-cherry/40 text-cherry font-semibold py-3 px-4 rounded-2xl bg-rose/40 hover:bg-rose/70 transition text-center text-sm sm:text-base"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h18M9 6l-6 6 6 6"/>
+                        </svg>
+                        <span>Not yet • Back to home</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
