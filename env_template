@@ -1,0 +1,7 @@
+PORT=3000
+DB_HOST="localhost"
+DB_NAME="MicroOnlineMarket_Group1_Section8"
+DB_PORT=3306
+DB_USER='root'
+DB_PASSWORD='root'
+SESSION_SECRET="MICKRO"
