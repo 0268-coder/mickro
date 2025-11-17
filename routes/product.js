@@ -30,7 +30,7 @@ router.get('/',async(req,res)=>{
 })
 
 //get product from id
-router.get('/product/:id',async(req,res)=>{
+router.get('/:id',async(req,res)=>{
     
     try{
         //sql query
