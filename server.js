@@ -60,6 +60,7 @@ const checkoutRouter = require("./routes/checkout")
 const reviewRouter = require("./routes/review")
 const orderRouter = require("./routes/order")
 const adminProductRouter = require('./routes/adminFolder/adminProduct.js')
+const adminOrderRouter = require('./routes/adminFolder/adminOrder.js')
 
 app.use("/login",loginRouter)
 app.use("/register", registerRouter);
@@ -72,6 +73,7 @@ app.use("/checkout",checkoutRouter)
 app.use("/review",reviewRouter)
 app.use("/order",orderRouter)
 app.use("/admin/product",adminProductRouter)
+app.use("/admin/order",adminOrderRouter)
 
 app.get("/", authenticateUser, async (req,res)=>{
 
@@ -82,8 +84,99 @@ app.get("/", authenticateUser, async (req,res)=>{
     res.render("product/product", { userAddress: userAddr, user: req.session.user,product: allProducts })
 });
 
-app.get("/admin", authenticateUser,authenticateAdmin, (req,res)=>{
-    res.render("admin/adminpage");
+app.get("/admin", authenticateUser,authenticateAdmin, async (req,res)=>{
+    try {
+        // Fetch all orders
+        const [orders] = await db.query(`
+            SELECT 
+                Order_ID,
+                Full_Name,
+                Phone,
+                Address,
+                Order_Date,
+                Payment_Method,
+                Order_Total
+            FROM orders
+            ORDER BY Order_Date DESC
+        `)
+        
+        // Calculate total revenue
+        const [revenueResult] = await db.query(`
+            SELECT COALESCE(SUM(Order_Total), 0) as totalRevenue
+            FROM orders
+        `)
+        const totalRevenue = revenueResult[0].totalRevenue
+        
+        // Calculate today's revenue
+        const [todayRevenueResult] = await db.query(`
+            SELECT COALESCE(SUM(Order_Total), 0) as todayRevenue
+            FROM orders
+            WHERE DATE(Order_Date) = CURDATE()
+        `)
+        const todayRevenue = todayRevenueResult[0].todayRevenue
+        
+        // Count all orders
+        const [orderCountResult] = await db.query(`
+            SELECT COUNT(*) as totalOrders
+            FROM orders
+        `)
+        const totalOrders = orderCountResult[0].totalOrders
+        
+        // Count today's orders
+        const [todayOrdersResult] = await db.query(`
+            SELECT COUNT(*) as todayOrders
+            FROM orders
+            WHERE DATE(Order_Date) = CURDATE()
+        `)
+        const todayOrders = todayOrdersResult[0].todayOrders
+        
+        // Count all users
+        const [userCountResult] = await db.query(`
+            SELECT COUNT(*) as totalUsers
+            FROM user
+        `)
+        const totalUsers = userCountResult[0].totalUsers
+        
+        // Count today's new users (assuming users have a date field, or using ID as proxy)
+        // If user table has a created_at or registration_date field, use that
+        // For now, I'll count users with today's date if DOB is used as registration
+        const [todayUsersResult] = await db.query(`
+            SELECT COUNT(*) as todayUsers
+            FROM user
+            WHERE DATE(DOB) = CURDATE()
+        `)
+        const todayUsers = todayUsersResult[0].todayUsers
+        
+        // Count all products
+        const [productCountResult] = await db.query(`
+            SELECT COUNT(*) as totalProducts
+            FROM product
+        `)
+        const totalProducts = productCountResult[0].totalProducts
+        
+        res.render("admin/adminpage", { 
+            orders: orders,
+            totalRevenue: totalRevenue,
+            todayRevenue: todayRevenue,
+            totalOrders: totalOrders,
+            todayOrders: todayOrders,
+            totalUsers: totalUsers,
+            todayUsers: todayUsers,
+            totalProducts: totalProducts
+        });
+    } catch (error) {
+        console.error("Error fetching admin data:", error)
+        res.render("admin/adminpage", { 
+            orders: [],
+            totalRevenue: 0,
+            todayRevenue: 0,
+            totalOrders: 0,
+            todayOrders: 0,
+            totalUsers: 0,
+            todayUsers: 0,
+            totalProducts: 0
+        });
+    }
 });
 
 app.listen(process.env.PORT || 3000,()=>{
