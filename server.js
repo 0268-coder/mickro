@@ -59,6 +59,7 @@ const paymentRouter = require("./routes/payment_method")
 const checkoutRouter = require("./routes/checkout")
 const reviewRouter = require("./routes/review")
 const orderRouter = require("./routes/order")
+const adminProductRouter = require('./routes/adminFolder/adminProduct.js')
 
 app.use("/login",loginRouter)
 app.use("/register", registerRouter);
@@ -70,6 +71,7 @@ app.use("/payment_method",paymentRouter)
 app.use("/checkout",checkoutRouter)
 app.use("/review",reviewRouter)
 app.use("/order",orderRouter)
+app.use("/admin/product",adminProductRouter)
 
 app.get("/", authenticateUser, async (req,res)=>{
 
@@ -80,8 +82,8 @@ app.get("/", authenticateUser, async (req,res)=>{
     res.render("product/product", { userAddress: userAddr, user: req.session.user,product: allProducts })
 });
 
-app.get("/admin", authenticateUser, (req,res)=>{
-    res.render("adminpage");
+app.get("/admin", authenticateUser,authenticateAdmin, (req,res)=>{
+    res.render("admin/adminpage");
 });
 
 app.listen(process.env.PORT || 3000,()=>{

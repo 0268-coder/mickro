@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Product</title>
+    </head>
+<body>
+
+    <div class="container">
+        <h1>Update Product</h1>
+
+        <%= product.Product_Name %>
+        <form action="/admin/product/update/<%= product.Product_ID %>" method="POST">
+            
+            <div>
+                <label for="name">Product Name:</label>
+                <input type="text" id="name" name="name" 
+                       value="<%= product.Product_Name %>" required>
+            </div>
+
+            <div>
+                <label for="price">Price:</label>
+                <input type="number" id="price" name="price" step="0.01" min="0" 
+                       value="<%= product.Product_Price %>" required>
+            </div>
+
+            <div>
+                <label for="length">Length:</label>
+                <input type="number" id="length" name="length" step="0.1" min="0" 
+                       value="<%= product.Length %>">
+            </div>
+
+            <div>
+                <label for="height">Height:</label>
+                <input type="number" id="height" name="height" step="0.1" min="0" 
+                       value="<%= product.Height %>">
+            </div>
+
+            <div>
+                <label for="width">Width:</label>
+                <input type="number" id="width" name="width" step="0.1" min="0" 
+                       value="<%= product.Width %>">
+            </div>
+
+            <div>
+                <label for="image">Image URL/Path:</label>
+                <input type="text" id="image" name="image" 
+                       value="<%= product.image %>">
+            </div>
+
+            <button type="submit">Save Changes</button>
+        </form>
+    </div>
+
+</body>
+</html>
