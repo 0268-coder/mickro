@@ -1,21 +1,192 @@
-<%- layout('layout') %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mickro • <%= product.Product_Name %></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        blush: '#FBD7D7',
+                        rose: '#FCE5E5',
+                        cherry: '#D94F5C',
+                        cherryDark: '#BE3B48',
+                        label: '#C64C5A',
+                        placeholder: '#F5B8B8'
+                    },
+                    fontFamily: {
+                        nunito: ['"Nunito"', 'sans-serif'],
+                        pacifico: ['"Pacifico"', 'cursive']
+                    },
+                    boxShadow: {
+                        soft: '0 20px 60px rgba(217, 79, 92, 0.15)'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Pacifico&display=swap" rel="stylesheet">
+</head>
+<body class="min-h-screen bg-blush font-nunito pb-24">
 
-<h1><%= product.Product_Name %></h1>
-<p>
-    Price: <%= product.Product_Price %><br>
-    Length: <%= product.Length %><br>
-    Height: <%= product.Height %><br>
-    Width: <%= product.Width %><br>
-    Avg_Rating: <%= product.Avg_Rating %><br>
-</p>
-<form action="/cart" method="POST">
-    <input type="hidden" value="<%= product.Product_ID %>" name="Product_ID">
-    <input type="hidden" value="<%= product.Product_Name %>" name = "Product_Name">
-    <input type="hidden" value="<%= product.Product_Price %>" name="Product_Price">
-    <label for="quantity">Quantity</label>
-    <input type="number" name="quantity" value="1" min="1">
-    <input type="submit" value="add to cart">
-</form>
-<form action="/product" method="GET">
-    <input type="submit" value="back" name="submit">
-</form>
+    <header class="sticky top-0 z-40 bg-blush/90 backdrop-blur-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center">
+                <a href="/product" class="inline-flex items-center gap-2 text-cherry hover:text-cherryDark transition group">
+                    <div class="bg-white p-2 rounded-full shadow-sm group-hover:shadow-md transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                        </svg>
+                    </div>
+                    <span class="font-bold text-lg">Back to products</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        
+        <div class="bg-white rounded-[2rem] shadow-soft overflow-hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2">
+                
+                <div class="bg-rose/30 p-8 md:p-12 flex items-center justify-center relative">
+                    <div class="absolute w-64 h-64 bg-white/40 rounded-full blur-3xl"></div>
+                    
+                    <%
+                      let imgPath = "/images/logo.png";
+                      const name = (product.Product_Name || "").toLowerCase();
+
+                      if (name.includes("seabass") || name.includes("fish")) imgPath = "/images/seabass.png";
+                      else if (name.includes("pork")) imgPath = "/images/pork-loin.png";
+                      else if (name.includes("morning glory") || name.includes("pak boong") || name.includes("kangkung")) imgPath = "/images/morning-glory.png";
+                      else if (name.includes("rice") || name.includes("jasmine")) imgPath = "/images/jasmine-rice.png";
+                      else if (name.includes("egg")) imgPath = "/images/cage-free-eggs.png";
+                    %>
+                    <img src="<%= imgPath %>" alt="<%= product.Product_Name %>" class="relative z-10 w-full max-w-sm object-contain drop-shadow-xl transition hover:scale-105 duration-500">
+                </div>
+
+                <div class="p-6 md:p-10 flex flex-col justify-center">
+                    <div class="mb-6">
+                        <h1 class="text-3xl md:text-4xl font-extrabold text-cherry mb-2 leading-tight"><%= product.Product_Name %></h1>
+                        <p class="text-4xl font-bold text-cherryDark inline-block bg-rose/30 px-4 py-1 rounded-xl">
+                            $<%= product.Product_Price %>
+                        </p>
+                    </div>
+
+                    <div class="bg-rose/10 rounded-2xl p-6 mb-8 border border-rose/20">
+                        <h3 class="text-cherryDark/70 font-bold mb-4 uppercase tracking-wider text-xs">Specification</h3>
+                        <div class="grid grid-cols-2 gap-y-6 gap-x-4">
+                            <div class="flex items-center gap-3">
+                                <div class="bg-white p-2 rounded-lg text-cherry shadow-sm">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg>
+                                </div>
+                                <div>
+                                    <span class="block text-xs text-cherry/60 font-bold">Length</span>
+                                    <span class="block font-bold text-cherry text-lg"><%= product.Length %></span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="bg-white p-2 rounded-lg text-cherry shadow-sm">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                                </div>
+                                <div>
+                                    <span class="block text-xs text-cherry/60 font-bold">Width</span>
+                                    <span class="block font-bold text-cherry text-lg"><%= product.Width %></span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="bg-white p-2 rounded-lg text-cherry shadow-sm">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                                </div>
+                                <div>
+                                    <span class="block text-xs text-cherry/60 font-bold">Height</span>
+                                    <span class="block font-bold text-cherry text-lg"><%= product.Height %></span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="bg-white p-2 rounded-lg text-yellow-400 shadow-sm">
+                                    <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                </div>
+                                <div>
+                                    <span class="block text-xs text-cherry/60 font-bold">Rating</span>
+                                    <span class="block font-bold text-cherry text-lg"><%= product.Avg_Rating %></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form action="/cart" method="POST" class="space-y-4 mt-auto">
+                        <input type="hidden" name="Product_ID" value="<%= product.Product_ID %>">
+                        <input type="hidden" name="Product_Name" value="<%= product.Product_Name %>">
+                        <input type="hidden" name="Product_Price" value="<%= product.Product_Price %>">
+
+                        <div class="flex items-end gap-4">
+                            <div class="w-1/3">
+                                <label for="qty-<%= product.Product_ID %>" class="block text-xs font-bold text-cherry mb-2 ml-1 uppercase tracking-wider">Quantity</label>
+                                <div class="relative">
+                                    <input 
+                                        type="number" 
+                                        id="qty-<%= product.Product_ID %>" 
+                                        name="quantity"
+                                        value="1"
+                                        min="1"
+                                        class="w-full px-4 py-3 rounded-xl bg-rose/10 border-2 border-rose text-cherry font-bold focus:outline-none focus:ring-2 focus:ring-cherry focus:border-transparent text-center text-xl"
+                                    >
+                                </div>
+                            </div>
+                            <div class="w-2/3">
+                                <button 
+                                    type="submit" 
+                                    class="w-full bg-cherry hover:bg-cherryDark text-white text-lg font-bold py-3.5 px-6 rounded-xl transition duration-300 shadow-lg shadow-cherry/30 hover:shadow-cherry/50 transform active:scale-95 flex items-center justify-center gap-2"
+                                >
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                    Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <nav class="fixed bottom-0 left-0 right-0 bg-rose border-t border-rose/50 shadow-lg z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-around items-center py-4">
+                <a href="/" class="flex flex-col items-center text-cherry hover:text-cherryDark transition transform hover:scale-110">
+                    <div class="w-8 h-8 flex items-center justify-center mb-1">
+                        <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                        </svg>
+                    </div>
+                    <span class="text-[10px] font-bold uppercase tracking-wide">Home</span>
+                </a>
+                
+                <a href="/cart" class="flex flex-col items-center text-cherry hover:text-cherryDark transition transform hover:scale-110">
+                    <div class="w-8 h-8 flex items-center justify-center mb-1">
+                        <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
+                        </svg>
+                    </div>
+                    <span class="text-[10px] font-bold uppercase tracking-wide">Cart</span>
+                </a>
+                
+                <a href="/login" class="flex flex-col items-center text-cherry hover:text-cherryDark transition transform hover:scale-110">
+                    <div class="w-8 h-8 flex items-center justify-center mb-1">
+                        <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <span class="text-[10px] font-bold uppercase tracking-wide">Profile</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+</body>
+</html>

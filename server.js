@@ -65,7 +65,6 @@ const adminOrderRouter = require('./routes/adminFolder/adminOrder.js')
 app.use("/login",loginRouter)
 app.use("/register", registerRouter);
 app.use("/address", addressRouter);
-app.use("/order",orderRouter)
 app.use("/product",productRouter)
 app.use("/cart",cartRouter)
 app.use("/payment_method",paymentRouter)
