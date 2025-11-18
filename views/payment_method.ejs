@@ -84,7 +84,12 @@
                                         <p class="text-cherry font-semibold text-lg">0000-0000-1234-xx78</p>
                                         <p class="text-gray-500 text-sm">Visa Card</p>
                                     <% } else { %>
-                                        <p class="text-cherry font-semibold text-lg"><%= method.Method_Type %></p>
+                                        <%
+                                          const formattedMethod = method.Method_Type
+                                            ? method.Method_Type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+                                            : '';
+                                        %>
+                                        <p class="text-cherry font-semibold text-lg"><%= formattedMethod %></p>
                                     <% } %>
                                 </div>
                             </div>

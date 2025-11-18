@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.1.2
+-- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost:3306
--- Generation Time: Nov 17, 2025 at 10:09 AM
--- Server version: 5.7.24
--- PHP Version: 8.3.1
+-- Host: localhost:8889
+-- Generation Time: Nov 18, 2025 at 07:38 AM
+-- Server version: 8.0.40
+-- PHP Version: 8.3.14
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -21,109 +21,53 @@ SET time_zone = "+00:00";
 -- Database: `micro-8.2`
 --
 
--- --------------------------------------------------------
-
+DELIMITER $$
 --
--- Table structure for table `cash`
+-- Procedures
 --
+CREATE DEFINER=`root`@`localhost` PROCEDURE `calculate_order_total` (IN `p_order_id` INT)   BEGIN
+    DECLARE v_subtotal DECIMAL(10,2);
 
-CREATE TABLE `cash` (
-  `Payment_Method_ID` int(11) NOT NULL,
-  `amount` decimal(10,2) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    -- 1) Calculate subtotal from orderitems
+    SELECT SUM(Quantity * Unit_Price)
+    INTO v_subtotal
+    FROM orderitems
+    WHERE Order_ID = p_order_id;
 
---
--- Dumping data for table `cash`
---
+    -- If no items, subtotal = 0
+    IF v_subtotal IS NULL THEN
+        SET v_subtotal = 0;
+    END IF;
 
-INSERT INTO `cash` (`Payment_Method_ID`, `amount`) VALUES
-(1, '0.00');
+    -- 2) Update orders table
+    UPDATE orders
+    SET 
+        Order_Subtotal = v_subtotal,
+        Order_Total    = v_subtotal + Delivery_Fee
+    WHERE Order_ID = p_order_id;
+END$$
 
--- --------------------------------------------------------
+CREATE DEFINER=`root`@`localhost` PROCEDURE `register_new_user` (IN `p_username` VARCHAR(50), IN `p_password` VARCHAR(255), IN `p_fname` VARCHAR(50), IN `p_lname` VARCHAR(50), IN `p_email` VARCHAR(255), IN `p_phoneNumber` VARCHAR(20), IN `p_dateOfBirth` DATE, IN `p_address` VARCHAR(255))   BEGIN
+    DECLARE v_user_id INT;
 
---
--- Table structure for table `coupon`
---
+    -- 1) Insert personal info into user table
+    INSERT INTO user (Fname, Lname, Email, PhoneNumber, DOB, Address)
+    VALUES (p_fname, p_lname, p_email, p_phoneNumber, p_dateOfBirth, p_address);
 
-CREATE TABLE `coupon` (
-  `Coupon_ID` int(11) NOT NULL,
-  `Coupon_Name` varchar(50) NOT NULL,
-  `Discount_Value` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    SET v_user_id = LAST_INSERT_ID();
 
---
--- Dumping data for table `coupon`
---
+    -- 2) Insert login with hashed password into login table
+    -- NOTE: This uses SHA-256 at DB level. Make sure login.Password is VARBINARY(32) or similar.
+    INSERT INTO login (Username, Password, Status, User_ID)
+    VALUES (
+        p_username,
+        UNHEX(SHA2(p_password, 256)),  -- hash password
+        'user',
+        v_user_id
+    );
+END$$
 
-INSERT INTO `coupon` (`Coupon_ID`, `Coupon_Name`, `Discount_Value`) VALUES
-(1, 'FRESH100', 100),
-(2, 'VEG20', 20),
-(3, 'SEAFOOD50', 50),
-(4, 'NEWBASKET150', 150),
-(5, 'FREEDELIVERY', 30);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `credit_card`
---
-
-CREATE TABLE `credit_card` (
-  `Payment_Method_ID` int(11) NOT NULL,
-  `Card_Number` varchar(16) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Dumping data for table `credit_card`
---
-
-INSERT INTO `credit_card` (`Payment_Method_ID`, `Card_Number`) VALUES
-(2, '1111222233334444');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `deliver`
---
-
-CREATE TABLE `deliver` (
-  `Delivery_ID` int(11) NOT NULL,
-  `Product_ID` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Dumping data for table `deliver`
---
-
-INSERT INTO `deliver` (`Delivery_ID`, `Product_ID`) VALUES
-(1, 1),
-(2, 2),
-(3, 3),
-(4, 4),
-(5, 5);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `delivery`
---
-
-CREATE TABLE `delivery` (
-  `Delivery_ID` int(11) NOT NULL,
-  `Delivery_address` varchar(255) DEFAULT NULL,
-  `Delivered_time` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Dumping data for table `delivery`
---
-
-INSERT INTO `delivery` (`Delivery_ID`, `Delivery_address`, `Delivered_time`) VALUES
-(1, 'Bangkok – Chatuchak', '2025-11-06 09:30:00'),
-(2, 'Bangkok – Thonglor', '2025-11-06 11:15:00'),
-(3, 'Chiang Mai – Nimman', '2025-11-07 10:00:00'),
-(4, 'Khon Kaen – City', '2025-11-07 13:45:00'),
-(5, 'Phuket – Patong', '2025-11-08 08:50:00');
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -132,12 +76,12 @@ INSERT INTO `delivery` (`Delivery_ID`, `Delivery_address`, `Delivered_time`) VAL
 --
 
 CREATE TABLE `login` (
-  `Login_ID` int(11) NOT NULL,
+  `Login_ID` int NOT NULL,
   `Username` varchar(50) NOT NULL,
   `Password` varbinary(100) NOT NULL,
   `Status` varchar(50) DEFAULT 'user',
-  `User_ID` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `User_ID` int DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `login`
@@ -149,7 +93,8 @@ INSERT INTO `login` (`Login_ID`, `Username`, `Password`, `Status`, `User_ID`) VA
 (102, 'ping01', 0x4b7201735c980845dfea505bd3cb694ea4c56c1e378e4be3333f41c4e4342398, 'user', 3),
 (103, 'peppo01', 0xbb244c9456c9b934d0d36d541a7314fea0099871163ad97fea85f8139ce4d6c0, 'user', 4),
 (104, 'yew01', 0xadca8cafa3caab6e11fb222d68d4c3c09df64864fbad2881ebcf2b9877f020ba, 'user', 5),
-(105, 'peppo', 0x243262243133246f6d4d4e4a316941762e4e4c572e4f37336d32466b757957414b654a333439566d76394e70426a3952364f5a736850776445353053, 'admin', 32);
+(105, 'peppo', 0x243262243133246f6d4d4e4a316941762e4e4c572e4f37336d32466b757957414b654a333439566d76394e70426a3952364f5a736850776445353053, 'user', 32),
+(106, 'MW', 0x2432622431332439454d32376f78484c6e6456712e6f4649587861636547655a6636416c3952695077773548456c72706c4e6258797732457a356965, 'user', 33);
 
 -- --------------------------------------------------------
 
@@ -158,33 +103,114 @@ INSERT INTO `login` (`Login_ID`, `Username`, `Password`, `Status`, `User_ID`) VA
 --
 
 CREATE TABLE `orderitems` (
-  `OrderItem_ID` int(11) NOT NULL,
-  `Order_ID` int(11) NOT NULL,
-  `Product_ID` int(11) NOT NULL,
-  `Quantity` int(11) NOT NULL,
+  `OrderItem_ID` int NOT NULL,
+  `Order_ID` int NOT NULL,
+  `Product_ID` int NOT NULL,
+  `Quantity` int NOT NULL,
   `Unit_Price` decimal(10,2) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `orderitems`
 --
 
 INSERT INTO `orderitems` (`OrderItem_ID`, `Order_ID`, `Product_ID`, `Quantity`, `Unit_Price`) VALUES
-(1, 1, 5, 1, '220.00'),
-(2, 2, 5, 1, '220.00'),
-(3, 3, 5, 1, '220.00'),
-(4, 4, 5, 1, '220.00'),
-(5, 5, 5, 3, '220.00'),
-(6, 6, 5, 1, '220.00'),
-(7, 7, 5, 1, '220.00'),
-(8, 8, 2, 1, '75.00'),
-(9, 9, 5, 1, '220.00'),
-(10, 10, 2, 1, '75.00'),
-(11, 10, 3, 1, '25.00'),
-(12, 10, 4, 1, '165.00'),
-(13, 11, 3, 1, '25.00'),
-(14, 11, 2, 1, '75.00'),
-(15, 11, 1, 1, '189.00');
+(1, 1, 5, 1, 220.00),
+(2, 2, 5, 1, 220.00),
+(3, 3, 5, 1, 220.00),
+(4, 4, 5, 1, 220.00),
+(5, 5, 5, 3, 220.00),
+(6, 6, 5, 1, 220.00),
+(7, 7, 5, 1, 220.00),
+(8, 8, 2, 1, 75.00),
+(9, 9, 5, 1, 220.00),
+(10, 10, 2, 1, 75.00),
+(11, 10, 3, 1, 25.00),
+(12, 10, 4, 1, 165.00),
+(13, 11, 3, 1, 25.00),
+(14, 11, 2, 1, 75.00),
+(15, 11, 1, 1, 189.00),
+(16, 12, 1, 1, 189.00),
+(17, 12, 2, 3, 75.00),
+(18, 13, 2, 3, 75.00),
+(19, 14, 2, 4, 75.00),
+(20, 14, 4, 1, 165.00),
+(21, 14, 3, 1, 25.00),
+(22, 14, 1, 1, 189.00),
+(23, 14, 5, 1, 220.00),
+(24, 15, 3, 3, 25.00),
+(25, 15, 4, 10, 165.00),
+(26, 15, 1, 1, 189.00),
+(27, 15, 5, 1, 220.00),
+(28, 16, 1, 2, 189.00),
+(29, 16, 3, 3, 25.00),
+(30, 17, 1, 4, 189.00),
+(31, 17, 2, 11, 75.00),
+(32, 17, 3, 1, 25.00),
+(33, 18, 1, 14, 189.00),
+(34, 18, 2, 2, 75.00),
+(35, 18, 3, 2, 25.00),
+(36, 18, 4, 3, 165.00),
+(37, 18, 5, 1, 220.00),
+(38, 19, 1, 1, 189.00),
+(39, 19, 5, 8, 220.00),
+(40, 20, 1, 8, 189.00),
+(41, 21, 3, 4, 25.00),
+(42, 21, 2, 1, 75.00),
+(43, 21, 1, 1, 189.00),
+(44, 22, 2, 1, 75.00),
+(45, 22, 3, 4, 25.00);
+
+--
+-- Triggers `orderitems`
+--
+DELIMITER $$
+CREATE TRIGGER `trg_orderitems_after_delete_update_totals` AFTER DELETE ON `orderitems` FOR EACH ROW BEGIN
+    DECLARE v_subtotal DECIMAL(10,2);
+
+    -- Recalculate subtotal for the remaining items
+    SELECT SUM(Quantity * Unit_Price)
+    INTO v_subtotal
+    FROM orderitems
+    WHERE Order_ID = OLD.Order_ID;
+
+    -- If no items remain, subtotal becomes 0
+    IF v_subtotal IS NULL THEN
+        SET v_subtotal = 0;
+    END IF;
+
+    -- Update orders table
+    UPDATE orders
+    SET
+        Order_Subtotal = v_subtotal,
+        Order_Total = v_subtotal + Delivery_Fee
+    WHERE Order_ID = OLD.Order_ID;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `trg_orderitems_after_insert_update_totals` AFTER INSERT ON `orderitems` FOR EACH ROW BEGIN
+    DECLARE v_subtotal DECIMAL(10,2);
+
+    -- Calculate subtotal
+    SELECT SUM(Quantity * Unit_Price)
+    INTO v_subtotal
+    FROM orderitems
+    WHERE Order_ID = NEW.Order_ID;
+
+    IF v_subtotal IS NULL THEN 
+        SET v_subtotal = 0;
+    END IF;
+
+    -- Update the orders table
+    UPDATE orders
+    SET 
+        Order_Subtotal = v_subtotal,
+        Order_Total = v_subtotal + Delivery_Fee
+    WHERE Order_ID = NEW.Order_ID;
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -193,8 +219,8 @@ INSERT INTO `orderitems` (`OrderItem_ID`, `Order_ID`, `Product_ID`, `Quantity`, 
 --
 
 CREATE TABLE `orders` (
-  `Order_ID` int(11) NOT NULL,
-  `User_ID` int(11) DEFAULT NULL,
+  `Order_ID` int NOT NULL,
+  `User_ID` int DEFAULT NULL,
   `Order_Subtotal` decimal(10,2) NOT NULL,
   `Delivery_Fee` decimal(10,2) NOT NULL,
   `Order_Total` decimal(10,2) NOT NULL,
@@ -203,95 +229,35 @@ CREATE TABLE `orders` (
   `Phone` varchar(50) NOT NULL,
   `Payment_Method` varchar(100) NOT NULL,
   `Order_Date` datetime NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `orders`
 --
 
 INSERT INTO `orders` (`Order_ID`, `User_ID`, `Order_Subtotal`, `Delivery_Fee`, `Order_Total`, `Full_Name`, `Address`, `Phone`, `Payment_Method`, `Order_Date`) VALUES
-(1, NULL, '220.00', '15.00', '235.00', 'asd', 'Sirindhorn International Institute of Technology', '123', '', '2025-11-16 13:09:27'),
-(2, NULL, '220.00', '15.00', '235.00', 'asd', 'Sirindhorn International Institute of Technology', '123', '', '2025-11-16 13:11:04'),
-(3, NULL, '220.00', '15.00', '235.00', 'asd', 'Sirindhorn International Institute of Technology', '123', '', '2025-11-16 13:13:29'),
-(4, NULL, '220.00', '15.00', '235.00', 'Rangsimann Sattayasrom', 'Sirindhorn International Institute of Technology', '123123123123', '', '2025-11-16 13:28:32'),
-(5, NULL, '660.00', '15.00', '675.00', 'Rangsdasd', 'Sirindhorn International Institute of Technology', '123123f', '', '2025-11-16 13:33:27'),
-(6, NULL, '220.00', '15.00', '235.00', 'MickAuan', 'Sirindhorn International Institute of Technology', '978345', '', '2025-11-16 13:37:07'),
-(7, NULL, '220.00', '15.00', '235.00', 'asd', 'Sirindhorn International Institute of Technology', 'asdasd', '', '2025-11-16 13:39:18'),
-(8, NULL, '75.00', '15.00', '90.00', 'asdasd', 'Sirindhorn International Institute of Technology', 'asdasd', '', '2025-11-16 13:42:18'),
-(9, NULL, '220.00', '15.00', '235.00', 'Lord Pepsi Coke', 'Sirindhorn International Institute of Technology', '123123123123', '', '2025-11-16 13:58:44'),
-(10, 32, '265.00', '15.00', '280.00', 'Ratchanon Wongwitutai', 'อยู่ในใจมิ๊ก', '0985848369', 'Cash', '2025-11-16 22:02:35'),
-(11, 32, '289.00', '15.00', '304.00', 'Ratchanon Wongwitutai', 'อยู่ในใจมิ๊ก', '0985848369', 'Cash', '2025-11-16 22:09:34');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `order_transaction`
---
-
-CREATE TABLE `order_transaction` (
-  `Transaction_ID` int(11) NOT NULL,
-  `User_ID` int(11) DEFAULT NULL,
-  `Coupon_ID` int(11) DEFAULT NULL,
-  `Payment_Method_ID` int(11) DEFAULT NULL,
-  `Order_Date` date DEFAULT NULL,
-  `Total_price` decimal(10,2) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Dumping data for table `order_transaction`
---
-
-INSERT INTO `order_transaction` (`Transaction_ID`, `User_ID`, `Coupon_ID`, `Payment_Method_ID`, `Order_Date`, `Total_price`) VALUES
-(1, 3, 1, 1, '2025-11-06', '89.00'),
-(2, 2, 2, 2, '2025-11-06', '55.00'),
-(3, 5, 3, 1, '2025-11-07', '0.00'),
-(4, 4, 4, 2, '2025-11-07', '15.00'),
-(5, 5, 5, 1, '2025-11-08', '190.00');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `payment`
---
-
-CREATE TABLE `payment` (
-  `Payment_ID` int(11) NOT NULL,
-  `Order_ID` int(11) NOT NULL,
-  `Payment_Method_ID` int(11) NOT NULL,
-  `Amount` decimal(10,2) NOT NULL,
-  `Status` enum('pending','paid','failed','refunded') NOT NULL DEFAULT 'paid',
-  `Paid_At` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Dumping data for table `payment`
---
-
-INSERT INTO `payment` (`Payment_ID`, `Order_ID`, `Payment_Method_ID`, `Amount`, `Status`, `Paid_At`) VALUES
-(1, 1, 1, '89.00', 'paid', '2025-11-06 09:40:00'),
-(2, 2, 2, '55.00', 'paid', '2025-11-06 11:25:00'),
-(3, 3, 1, '0.00', 'paid', '2025-11-07 10:10:00'),
-(4, 4, 2, '15.00', 'paid', '2025-11-07 13:55:00'),
-(5, 5, 1, '190.00', 'paid', '2025-11-08 09:00:00');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `payment_card_detail`
---
-
-CREATE TABLE `payment_card_detail` (
-  `Payment_ID` int(11) NOT NULL,
-  `Card_Number` varchar(16) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Dumping data for table `payment_card_detail`
---
-
-INSERT INTO `payment_card_detail` (`Payment_ID`, `Card_Number`) VALUES
-(2, '5544332211998877'),
-(4, '4111111111111111');
+(1, NULL, 220.00, 15.00, 235.00, 'asd', 'Sirindhorn International Institute of Technology', '123', '', '2025-11-16 13:09:27'),
+(2, NULL, 220.00, 15.00, 235.00, 'asd', 'Sirindhorn International Institute of Technology', '123', '', '2025-11-16 13:11:04'),
+(3, NULL, 220.00, 15.00, 235.00, 'asd', 'Sirindhorn International Institute of Technology', '123', '', '2025-11-16 13:13:29'),
+(4, NULL, 220.00, 15.00, 235.00, 'Rangsimann Sattayasrom', 'Sirindhorn International Institute of Technology', '123123123123', '', '2025-11-16 13:28:32'),
+(5, NULL, 660.00, 15.00, 675.00, 'Rangsdasd', 'Sirindhorn International Institute of Technology', '123123f', '', '2025-11-16 13:33:27'),
+(6, NULL, 220.00, 15.00, 235.00, 'MickAuan', 'Sirindhorn International Institute of Technology', '978345', '', '2025-11-16 13:37:07'),
+(7, NULL, 220.00, 15.00, 235.00, 'asd', 'Sirindhorn International Institute of Technology', 'asdasd', '', '2025-11-16 13:39:18'),
+(8, NULL, 75.00, 15.00, 90.00, 'asdasd', 'Sirindhorn International Institute of Technology', 'asdasd', '', '2025-11-16 13:42:18'),
+(9, NULL, 220.00, 15.00, 235.00, 'Lord Pepsi Coke', 'Sirindhorn International Institute of Technology', '123123123123', '', '2025-11-16 13:58:44'),
+(10, 32, 265.00, 15.00, 280.00, 'Ratchanon Wongwitutai', 'อยู่ในใจมิ๊ก', '0985848369', 'Cash', '2025-11-16 22:02:35'),
+(11, 32, 289.00, 15.00, 304.00, 'Ratchanon Wongwitutai', 'อยู่ในใจมิ๊ก', '0985848369', 'Cash', '2025-11-16 22:09:34'),
+(12, 33, 414.00, 15.00, 429.00, 'Phinnawat Yaemsanguan', '', '0661427227', '', '2025-11-17 12:04:54'),
+(13, 33, 225.00, 15.00, 240.00, 'Phinnawat Yaemsanguan', 'qq', '0661427227', 'Cash', '2025-11-17 12:47:59'),
+(14, 33, 899.00, 15.00, 914.00, 'Phinnawat Yaemsanguan', 'ABC MART', '0661427227', 'Credit_card', '2025-11-17 13:11:44'),
+(15, 33, 2134.00, 15.00, 2149.00, 'Phinnawat Yaemsanguan', 'ABC MART', '0661427227', 'Credit_card', '2025-11-17 13:34:18'),
+(16, 33, 453.00, 15.00, 468.00, 'Phinnawat Yaemsanguan', 'Mickkling\'s Home\r\n', '0661427227', 'Credit_card', '2025-11-17 21:51:15'),
+(17, 33, 1606.00, 15.00, 1621.00, 'Phinnawat Yaemsanguan', 'Mickkling\'s Home\r\n', '0661427227', 'Credit_card', '2025-11-17 22:10:36'),
+(18, 33, 3561.00, 15.00, 3576.00, 'Phinnawat Yaemsanguan', 'Mickkling\'s Home\r\n', '0661427227', 'Credit_card', '2025-11-17 22:27:19'),
+(19, 33, 1949.00, 15.00, 1964.00, 'Phinnawat Yaemsanguan', 'Mickkling\'s Home\r\n', '0661427227', 'Credit_card', '2025-11-17 22:33:05'),
+(20, 33, 1512.00, 15.00, 1527.00, 'Phinnawat Yaemsanguan', 'SIIT', '0661427227', 'Credit_card', '2025-11-18 11:50:00'),
+(21, 33, 364.00, 15.00, 379.00, 'Phinnawat Yaemsanguan', 'SIIT', '0661427227', 'Credit_card', '2025-11-18 13:09:55'),
+(22, 33, 175.00, 15.00, 190.00, 'Phinnawat Yaemsanguan', 'บ้านทรายทอง', '0661427227', 'Credit_card', '2025-11-18 13:36:40');
 
 -- --------------------------------------------------------
 
@@ -300,9 +266,9 @@ INSERT INTO `payment_card_detail` (`Payment_ID`, `Card_Number`) VALUES
 --
 
 CREATE TABLE `payment_method` (
-  `Payment_Method_ID` int(11) NOT NULL,
+  `Payment_Method_ID` int NOT NULL,
   `Method_Type` enum('Cash','Credit_card') NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `payment_method`
@@ -319,27 +285,25 @@ INSERT INTO `payment_method` (`Payment_Method_ID`, `Method_Type`) VALUES
 --
 
 CREATE TABLE `product` (
-  `Product_ID` int(11) NOT NULL,
+  `Product_ID` int NOT NULL,
   `Product_Name` varchar(100) NOT NULL,
   `Product_Price` decimal(10,2) NOT NULL,
   `Length` decimal(5,2) DEFAULT NULL,
   `Height` decimal(5,2) DEFAULT NULL,
   `Width` decimal(5,2) DEFAULT NULL,
   `image` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `product`
 --
 
 INSERT INTO `product` (`Product_ID`, `Product_Name`, `Product_Price`, `Length`, `Height`, `Width`, `image`) VALUES
-(1, 'Thai Jasmine Rice 5kg', '189.00', '40.00', '10.00', '30.00', NULL),
-(2, 'Cage-Free Eggs (10 pcs)', '75.00', '30.00', '8.00', '20.00', NULL),
-(3, 'Morning Glory (Pak Boong) 500g', '25.00', '35.00', '5.00', '10.00', NULL),
-(4, 'Pork Loin 1kg', '165.00', '25.00', '8.00', '15.00', NULL),
-(5, 'Seabass Cleaned 800g', '220.00', '30.00', '8.00', '12.00', NULL),
-(8, 'John', '150.00', '50.00', '50.00', '50.00', 'paimeung tai'),
-(9, 'Mick', '999999.00', '50.00', '170.00', '500.00', 'paimeung tai');
+(1, 'Thai Jasmine Rice 5kg', 189.00, 40.00, 10.00, 30.00, NULL),
+(2, 'Cage-Free Eggs (10 pcs)', 75.00, 30.00, 8.00, 20.00, NULL),
+(3, 'Morning Glory (Pak Boong) 500g', 25.00, 35.00, 5.00, 10.00, NULL),
+(4, 'Pork Loin 1kg', 165.00, 25.00, 8.00, 15.00, NULL),
+(5, 'Seabass Cleaned 800g', 220.00, 30.00, 8.00, 12.00, NULL);
 
 -- --------------------------------------------------------
 
@@ -348,12 +312,12 @@ INSERT INTO `product` (`Product_ID`, `Product_Name`, `Product_Price`, `Length`, 
 --
 
 CREATE TABLE `review` (
-  `Review_No` int(11) NOT NULL,
-  `User_ID` int(11) DEFAULT NULL,
+  `Review_No` int NOT NULL,
+  `User_ID` int DEFAULT NULL,
   `Review_date` datetime DEFAULT NULL,
   `Review_text` text,
-  `Rating` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `Rating` int DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `review`
@@ -367,7 +331,27 @@ INSERT INTO `review` (`Review_No`, `User_ID`, `Review_date`, `Review_text`, `Rat
 (5, 5, '2025-11-08 09:20:00', 'Seabass was fresh; would buy again.', 4),
 (6, NULL, '2025-11-16 13:51:05', 'Mick Auan', 5),
 (7, NULL, '2025-11-16 13:58:51', 'Mick Auan mak', 1),
-(8, NULL, '2025-11-16 22:09:42', 'haha xd', 3);
+(8, NULL, '2025-11-16 22:09:42', 'haha xd', 3),
+(9, NULL, '2025-11-17 12:05:00', '', 5),
+(10, NULL, '2025-11-17 13:11:57', 'diocweoc;ioevqiovqb;vui kuy', 4),
+(11, NULL, '2025-11-17 21:51:18', '', 3),
+(12, NULL, '2025-11-17 22:10:44', 'kuy', 5),
+(13, NULL, '2025-11-17 22:27:26', 'qwbfuclibDevf;ueDB:VUbpwe heheheh', 5),
+(14, NULL, '2025-11-17 22:33:12', 'anewqcnopqwj[wqjf[oqwjp[qfwj', 5),
+(15, NULL, '2025-11-18 11:50:05', '', 5),
+(16, NULL, '2025-11-18 13:36:56', 'dee makk', 5);
+
+--
+-- Triggers `review`
+--
+DELIMITER $$
+CREATE TRIGGER `trg_review_before_insert_set_date` BEFORE INSERT ON `review` FOR EACH ROW BEGIN
+    IF NEW.Review_Date IS NULL THEN
+        SET NEW.Review_Date = NOW();
+    END IF;
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -376,14 +360,14 @@ INSERT INTO `review` (`Review_No`, `User_ID`, `Review_date`, `Review_text`, `Rat
 --
 
 CREATE TABLE `user` (
-  `ID` int(11) NOT NULL,
+  `ID` int NOT NULL,
   `Fname` varchar(50) NOT NULL,
   `Lname` varchar(50) NOT NULL,
   `Address` varchar(255) DEFAULT NULL,
   `DOB` date DEFAULT NULL,
   `Email` varchar(100) NOT NULL,
   `PhoneNumber` varchar(10) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `user`
@@ -395,42 +379,12 @@ INSERT INTO `user` (`ID`, `Fname`, `Lname`, `Address`, `DOB`, `Email`, `PhoneNum
 (3, 'Ping', 'LeeFam', 'Phuket', '2002-03-08', 'ping@example.com', NULL),
 (4, 'Peppo', 'Rob', 'Khon Kaen', '1999-12-05', 'peppo@example.com', NULL),
 (5, 'Yew', 'Tia', 'Tak', '2003-06-15', 'yew@example.com', NULL),
-(32, 'Ratchanon', 'Wongwitutai', 'อยู่ในใจมิ๊ก', '2025-10-29', '6622780268@ggez', '0985848369');
+(32, 'Ratchanon', 'Wongwitutai', 'อยู่ในใจมิ๊ก', '2025-10-29', '6622780268@ggez', '0985848369'),
+(33, 'Mick', 'Wolff', 'บ้านทรายทอง', '2025-10-26', 'MW@gmail.cum', '0999999999');
 
 --
 -- Indexes for dumped tables
 --
-
---
--- Indexes for table `cash`
---
-ALTER TABLE `cash`
-  ADD PRIMARY KEY (`Payment_Method_ID`);
-
---
--- Indexes for table `coupon`
---
-ALTER TABLE `coupon`
-  ADD PRIMARY KEY (`Coupon_ID`);
-
---
--- Indexes for table `credit_card`
---
-ALTER TABLE `credit_card`
-  ADD PRIMARY KEY (`Payment_Method_ID`);
-
---
--- Indexes for table `deliver`
---
-ALTER TABLE `deliver`
-  ADD PRIMARY KEY (`Delivery_ID`,`Product_ID`),
-  ADD KEY `Product_ID` (`Product_ID`);
-
---
--- Indexes for table `delivery`
---
-ALTER TABLE `delivery`
-  ADD PRIMARY KEY (`Delivery_ID`);
 
 --
 -- Indexes for table `login`
@@ -453,29 +407,6 @@ ALTER TABLE `orderitems`
 --
 ALTER TABLE `orders`
   ADD PRIMARY KEY (`Order_ID`);
-
---
--- Indexes for table `order_transaction`
---
-ALTER TABLE `order_transaction`
-  ADD PRIMARY KEY (`Transaction_ID`),
-  ADD KEY `User_ID` (`User_ID`),
-  ADD KEY `Coupon_ID` (`Coupon_ID`),
-  ADD KEY `Payment_Method_ID` (`Payment_Method_ID`);
-
---
--- Indexes for table `payment`
---
-ALTER TABLE `payment`
-  ADD PRIMARY KEY (`Payment_ID`),
-  ADD KEY `idx_payment_order` (`Order_ID`),
-  ADD KEY `idx_payment_method` (`Payment_Method_ID`);
-
---
--- Indexes for table `payment_card_detail`
---
-ALTER TABLE `payment_card_detail`
-  ADD PRIMARY KEY (`Payment_ID`);
 
 --
 -- Indexes for table `payment_method`
@@ -508,93 +439,50 @@ ALTER TABLE `user`
 --
 
 --
--- AUTO_INCREMENT for table `coupon`
---
-ALTER TABLE `coupon`
-  MODIFY `Coupon_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- AUTO_INCREMENT for table `delivery`
---
-ALTER TABLE `delivery`
-  MODIFY `Delivery_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
 -- AUTO_INCREMENT for table `login`
 --
 ALTER TABLE `login`
-  MODIFY `Login_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=106;
+  MODIFY `Login_ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=107;
 
 --
 -- AUTO_INCREMENT for table `orderitems`
 --
 ALTER TABLE `orderitems`
-  MODIFY `OrderItem_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `OrderItem_ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `Order_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
-
---
--- AUTO_INCREMENT for table `order_transaction`
---
-ALTER TABLE `order_transaction`
-  MODIFY `Transaction_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- AUTO_INCREMENT for table `payment`
---
-ALTER TABLE `payment`
-  MODIFY `Payment_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `Order_ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `payment_method`
 --
 ALTER TABLE `payment_method`
-  MODIFY `Payment_Method_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `Payment_Method_ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `product`
 --
 ALTER TABLE `product`
-  MODIFY `Product_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `Product_ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `review`
 --
 ALTER TABLE `review`
-  MODIFY `Review_No` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `Review_No` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- Constraints for dumped tables
 --
-
---
--- Constraints for table `cash`
---
-ALTER TABLE `cash`
-  ADD CONSTRAINT `cash_ibfk_1` FOREIGN KEY (`Payment_Method_ID`) REFERENCES `payment_method` (`Payment_Method_ID`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `credit_card`
---
-ALTER TABLE `credit_card`
-  ADD CONSTRAINT `credit_card_ibfk_1` FOREIGN KEY (`Payment_Method_ID`) REFERENCES `payment_method` (`Payment_Method_ID`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `deliver`
---
-ALTER TABLE `deliver`
-  ADD CONSTRAINT `deliver_ibfk_1` FOREIGN KEY (`Delivery_ID`) REFERENCES `delivery` (`Delivery_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `deliver_ibfk_2` FOREIGN KEY (`Product_ID`) REFERENCES `product` (`Product_ID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `login`
@@ -608,27 +496,6 @@ ALTER TABLE `login`
 ALTER TABLE `orderitems`
   ADD CONSTRAINT `orderitems_ibfk_1` FOREIGN KEY (`Order_ID`) REFERENCES `orders` (`Order_ID`),
   ADD CONSTRAINT `orderitems_ibfk_2` FOREIGN KEY (`Product_ID`) REFERENCES `product` (`Product_ID`);
-
---
--- Constraints for table `order_transaction`
---
-ALTER TABLE `order_transaction`
-  ADD CONSTRAINT `order_transaction_ibfk_1` FOREIGN KEY (`User_ID`) REFERENCES `user` (`ID`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `order_transaction_ibfk_2` FOREIGN KEY (`Coupon_ID`) REFERENCES `coupon` (`Coupon_ID`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `order_transaction_ibfk_3` FOREIGN KEY (`Payment_Method_ID`) REFERENCES `payment_method` (`Payment_Method_ID`) ON DELETE SET NULL ON UPDATE CASCADE;
-
---
--- Constraints for table `payment`
---
-ALTER TABLE `payment`
-  ADD CONSTRAINT `fk_payment_method` FOREIGN KEY (`Payment_Method_ID`) REFERENCES `payment_method` (`Payment_Method_ID`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_payment_order` FOREIGN KEY (`Order_ID`) REFERENCES `order_transaction` (`Transaction_ID`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `payment_card_detail`
---
-ALTER TABLE `payment_card_detail`
-  ADD CONSTRAINT `fk_pc_payment` FOREIGN KEY (`Payment_ID`) REFERENCES `payment` (`Payment_ID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `review`
