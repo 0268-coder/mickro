@@ -59,13 +59,9 @@
                     
                     <%
                       let imgPath = "/images/logo.png";
-                      const name = (product.Product_Name || "").toLowerCase();
-
-                      if (name.includes("seabass") || name.includes("fish")) imgPath = "/images/seabass.png";
-                      else if (name.includes("pork")) imgPath = "/images/pork-loin.png";
-                      else if (name.includes("morning glory") || name.includes("pak boong") || name.includes("kangkung")) imgPath = "/images/morning-glory.png";
-                      else if (name.includes("rice") || name.includes("jasmine")) imgPath = "/images/jasmine-rice.png";
-                      else if (name.includes("egg")) imgPath = "/images/cage-free-eggs.png";
+                      if (product.image != null ){
+                        imgPath = product.image
+                      }
                     %>
                     <img src="<%= imgPath %>" alt="<%= product.Product_Name %>" class="relative z-10 w-full max-w-sm object-contain drop-shadow-xl transition hover:scale-105 duration-500">
                 </div>

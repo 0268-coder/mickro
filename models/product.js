@@ -13,6 +13,13 @@ const productModel = {
         return result[0]
     },
 
+    getImagePathByID: async(id)=>{
+        const [result] = await connection.query(
+            `SELECT image FROM Product WHERE Product_ID = ?`,
+        [id])
+        return result[0]
+    },
+
     addProduct: async(name,price,length,height,width,image)=>{
         const [result] = await connection.query(`
             INSERT INTO Product(Product_Name,Product_Price,Length,Height,Width,image)
@@ -46,6 +53,7 @@ const productModel = {
 
         return {message: "delete product", product: result.insertId}
     }
+
 }
 
 module.exports = productModel

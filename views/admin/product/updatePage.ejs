@@ -11,7 +11,7 @@
         <h1>Update Product</h1>
 
         <%= product.Product_Name %>
-        <form action="/admin/product/update/<%= product.Product_ID %>" method="POST">
+        <form action="/admin/product/update/<%= product.Product_ID %>" method="POST" enctype="multipart/form-data">
             
             <div>
                 <label for="name">Product Name:</label>
@@ -45,7 +45,7 @@
 
             <div>
                 <label for="image">Image URL/Path:</label>
-                <input type="text" id="image" name="image" 
+                <input type="file" id="image" name="image" 
                        value="<%= product.image %>">
             </div>
 

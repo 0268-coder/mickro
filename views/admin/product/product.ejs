@@ -58,7 +58,7 @@
                                              Edit
                                         </a>
 
-                                        <form action="/admin/product/delete/<%= item.Product_ID %>" method="POST" onsubmit="return confirm('Are you sure you want to delete <%= item.Product_Name %>?');">
+                                        <form action="/admin/product/delete/<%= item.Product_ID %>" method="POST" enctype="multipart/form-data" onsubmit="return confirm('Are you sure you want to delete <%= item.Product_Name %>?');">
                                             <button type="submit" 
                                                             class="text-red-600 hover:text-red-900 transition duration-150 p-2 rounded-lg bg-red-50">
                                                 Delete
