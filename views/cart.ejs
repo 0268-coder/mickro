@@ -72,7 +72,17 @@
                         <div class="flex gap-4">
                             <!-- Product Image -->
                             <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-rose/30 flex-shrink-0 overflow-hidden">
-                                <img src="https://via.placeholder.com/100x100/FBD7D7/D94F5C?text=<%= encodeURIComponent(item.name) %>" alt="<%= item.name %>" class="w-full h-full object-cover">
+                                <%
+                                  let imgPath = "/images/logo.png";
+                                  const name = (item.name || "").toLowerCase();
+
+                                  if (name.includes("seabass") || name.includes("fish")) imgPath = "/images/seabass.png";
+                                  else if (name.includes("pork")) imgPath = "/images/pork-loin.png";
+                                  else if (name.includes("morning glory") || name.includes("pak boong") || name.includes("kangkung")) imgPath = "/images/morning-glory.png";
+                                  else if (name.includes("rice") || name.includes("jasmine")) imgPath = "/images/jasmine-rice.png";
+                                  else if (name.includes("egg")) imgPath = "/images/cage-free-eggs.png";
+                                %>
+                                <img src="<%= imgPath %>" alt="<%= item.name %>" class="w-full h-full object-cover">
                             </div>
                             
                             <!-- Product Details -->
@@ -81,15 +91,16 @@
                                     <div class="flex-1 min-w-0">
                                         <h3 class="text-cherry font-semibold text-sm sm:text-base truncate"><%= item.name %></h3>
                                         <p class="text-gray-500 text-xs sm:text-sm mt-1"><%= item.price.toFixed(2) %> Baht</p>
-                                        <div class="flex items-center gap-2 mt-1">
-                                            <button class="decrease-btn w-6 h-6 bg-rose hover:bg-rose/80 text-cherry rounded-full flex items-center justify-center text-sm font-bold transition" data-item-id="<%= item.id %>">-</button>
-                                            <p class="text-gray-500 text-xs sm:text-sm">x<span class="quantity-display"><%= item.qty %></span></p>
-                                            <button class="increase-btn w-6 h-6 bg-rose hover:bg-rose/80 text-cherry rounded-full flex items-center justify-center text-sm font-bold transition" data-item-id="<%= item.id %>">+</button>
+                                        <div class="inline-flex items-center gap-2 mt-2 px-2 py-1 bg-rose/20 rounded-full">
+                                            <button class="decrease-btn w-8 h-8 sm:w-9 sm:h-9 bg-white border border-rose/60 hover:bg-rose hover:text-white text-cherry rounded-full flex items-center justify-center text-sm sm:text-base font-bold shadow-sm transition" data-item-id="<%= item.id %>">-</button>
+                                            <p class="text-gray-600 text-xs sm:text-sm font-semibold min-w-[40px] text-center">x<span class="quantity-display ml-1"><%= item.qty %></span></p>
+                                            <button class="increase-btn w-8 h-8 sm:w-9 sm:h-9 bg-cherry text-white hover:bg-cherryDark rounded-full flex items-center justify-center text-sm sm:text-base font-bold shadow-sm transition" data-item-id="<%= item.id %>">+</button>
                                         </div>
                                     </div>
                                 </div>
-                                <button class="delete-btn mt-2 bg-cherryDark hover:bg-cherry text-white text-xs px-3 py-1 rounded-lg transition" data-item-id="<%= item.id %>">
-                                    Remove
+                                <button class="delete-btn mt-3 inline-flex items-center gap-1 bg-white border border-rose/60 text-cherry hover:bg-rose/20 text-xs sm:text-sm px-4 py-1.5 rounded-full font-semibold transition shadow-sm" data-item-id="<%= item.id %>">
+                                    <span>&times;</span>
+                                    <span>Remove</span>
                                 </button>
                             </div>
                         </div>
@@ -124,7 +135,7 @@
                 <svg class="w-5 h-5 text-cherry" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                 </svg>
-                <span><%= typeof payment_type !== 'undefined' && payment_type ? payment_type : 'Select Payment Method' %></span>
+                <span><%= typeof payment_type !== 'undefined' && payment_type ? payment_type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'Select Payment Method' %></span>
             </div>
         </div>
     </main>
