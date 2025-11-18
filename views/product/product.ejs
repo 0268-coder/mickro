@@ -82,17 +82,7 @@
                     <div class="bg-white rounded-2xl shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition">
                         <a href="product/<%= element.Product_ID %>">
                             <div class="aspect-square bg-rose/30 flex items-center justify-center">
-                                <%
-                                  let imgPath = "/images/logo.png";
-                                  const name = (element.Product_Name || "").toLowerCase();
-
-                                  if (name.includes("seabass") || name.includes("fish")) imgPath = "/images/seabass.png";
-                                  else if (name.includes("pork")) imgPath = "/images/pork-loin.png";
-                                  else if (name.includes("morning glory") || name.includes("pak boong") || name.includes("kangkung")) imgPath = "/images/morning-glory.png";
-                                  else if (name.includes("rice") || name.includes("jasmine")) imgPath = "/images/jasmine-rice.png";
-                                  else if (name.includes("egg")) imgPath = "/images/cage-free-eggs.png";
-                                %>
-                                <img src="<%= imgPath %>" alt="<%= element.Product_Name %>" class="w-full h-full object-cover">
+                                <img src="<%= element.image %>" alt="<%= element.Product_Name %>" class="w-full h-full object-cover">
                             </div>
                             <div class="p-4">
                                 <p class="text-cherry font-semibold text-center mb-2"><%= element.Product_Name %></p>
