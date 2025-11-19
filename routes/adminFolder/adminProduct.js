@@ -169,25 +169,25 @@ function sepPublicPath(file) {
     }
 
     const fullPath = file.path; 
-
+    console.log(fullPath)
     // Define the prefix to remove: 'public/' or 'public\'
     // path.join('public', path.sep) handles the correct separator for the OS.
     const prefixToRemove = path.join('public', path.sep); 
-
+    console.log("prefixtoremove",prefixToRemove)
     let relativePath = fullPath;
     
     // Check if the path starts with the expected prefix and remove it
     if (fullPath.startsWith(prefixToRemove)) {
         relativePath = fullPath.substring(prefixToRemove.length);
     }
-    
+    console.log("relative path",relativePath)
     // Convert backslashes (Windows) to forward slashes (web standard)
-    const webPath = relativePath.replace(/\\/g, '/');
+    //const webPath = relativePath.replace(/\\/g, '/');
 
     console.log("Full Path:", fullPath);
-    console.log("Final Image Path:", webPath);
+    console.log("Final Image Path:", relativePath);
     
-    return webPath;
+    return relativePath;
 }
 
 async function deleteImage(id){

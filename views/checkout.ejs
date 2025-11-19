@@ -161,11 +161,10 @@
                                     <%
                                         let imgPath = "/images/logo.png";
                                         const lower = (item.name || "").toLowerCase();
-                                        if (lower.includes("seabass") || lower.includes("fish")) imgPath = "/images/seabass.png";
-                                        else if (lower.includes("pork")) imgPath = "/images/pork-loin.png";
-                                        else if (lower.includes("morning glory") || lower.includes("pak boong") || lower.includes("kangkung")) imgPath = "/images/morning-glory.png";
-                                        else if (lower.includes("rice") || lower.includes("jasmine")) imgPath = "/images/jasmine-rice.png";
-                                        else if (lower.includes("egg")) imgPath = "/images/cage-free-eggs.png";
+                                        
+                                         if(item.image != null && item.image != ""){
+                                        imgPath = item.image
+                                    }
                                     %>
                                     <img src="<%= imgPath %>" alt="<%= item.name %>" class="w-full h-full object-cover">
                                 </div>

@@ -3,15 +3,10 @@ const connection = require('../db');
 const registerModel = {
     // add Register queries to database
     register: async (firstName, lastName, username, email, password, dateOfBirth, phoneNumber, address) => {
+        //call procedure
         const [userRows] = await connection.query(
-            `INSERT INTO User (Fname, lName, Email, DOB, PhoneNumber, Address)
-            VALUES (?, ?, ?, ?, ?, ?)`,
-            [firstName, lastName, email, dateOfBirth, phoneNumber, address]);
-        
-        const [loginRows] = await connection.query(
-            `INSERT INTO Login (Username, Password, User_ID)
-            VALUES (?, ?, ?)`,
-            [username, password, userRows.insertId]
+            "CALL register_new_user(?,?,?,?,?,?,?,?)",
+            [username,password,firstName,lastName,email,phoneNumber,dateOfBirth,address]
         );
 
         return { user: userRows, login: loginRows };

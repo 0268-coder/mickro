@@ -40,7 +40,7 @@ router.post("/", async (req,res)=>{
     //hash password
     const hashedPassword = await bcrypt.hash(password, 13);
 
-    const result = await registerModel.register(firstName, lastName, username, email, hashedPassword, dateOfBirth, phoneNumber, address);
+    const result = await registerModel.register(username,hashedPassword,firstName,lastName,email,phoneNumber,dateOfBirth,address);
     res.redirect("/login");
 })
 

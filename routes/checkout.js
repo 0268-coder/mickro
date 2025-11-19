@@ -139,9 +139,9 @@ router.post('/', async (req, res) => {
 
             const [results] = await connection.query(
                 "SELECT Product_Price FROM Product WHERE Product_ID = ?",
-                itemID
+                [itemID]
             )
-
+            console.log(results)
             if (results.length === 0) continue
 
             const unitPrice = parseFloat(results[0].Product_Price)
@@ -156,7 +156,7 @@ router.post('/', async (req, res) => {
 
         // 3) Clear the cart after successful order
         req.session.cart = []
-
+        console.log("checkout POST")
         // 4) Show success page (or redirect)
         return res.render('checkout_success', {
             orderId: orderId,
@@ -197,7 +197,8 @@ router.post('/', async (req, res) => {
                         qty: item.qty,
                         price: price,
                         itemTotal: itemTotal.toFixed(2),
-                        product: product
+                        product: product,
+                        image: product.image
                     })
                 }
             }

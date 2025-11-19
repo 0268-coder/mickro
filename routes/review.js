@@ -19,7 +19,7 @@ router.get('/:orderId', async (req, res) => {
 router.post('/:orderId', async (req, res) => {
     const orderId = parseInt(req.params.orderId, 10) // just for display / linking
     const { rating, comment } = req.body
-
+    const userid = req.session.user.id
     if (!rating) {
         return res.status(400).render('review', {
             orderId,
@@ -35,8 +35,8 @@ router.post('/:orderId', async (req, res) => {
         await db.query(
             `INSERT INTO Review
                 (User_ID, Review_date, Review_text, Rating)
-             VALUES (NULL, NOW(), ?, ?)`,
-            [comment, rating]
+             VALUES (?, NOW(), ?, ?)`,
+            [userid,comment, rating]
         )
 
         // Show success page

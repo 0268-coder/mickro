@@ -38,7 +38,8 @@ router
                         name: item.name,
                         qty: item.qty,
                         price: parseFloat(product.Product_Price),
-                        product: product
+                        product: product,
+                        image: product.image
                     })
                 }
             }
@@ -70,6 +71,7 @@ router
             const product_name = req.body.Product_Name
             const product_ID = parseInt(req.body.Product_ID)
             const quantity = parseInt(req.body.quantity)
+            const image = req.body.image
             //initialize cart if it is not exist
             if (!req.session.cart){
                 req.session.cart = []
@@ -87,7 +89,8 @@ router
                 req.session.cart.push({
                     id: product_ID,
                     qty: quantity,
-                    name: product_name
+                    name: product_name,
+                    image: image
                 }) 
             }
             

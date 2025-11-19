@@ -75,12 +75,9 @@
                                 <%
                                   let imgPath = "/images/logo.png";
                                   const name = (item.name || "").toLowerCase();
-
-                                  if (name.includes("seabass") || name.includes("fish")) imgPath = "/images/seabass.png";
-                                  else if (name.includes("pork")) imgPath = "/images/pork-loin.png";
-                                  else if (name.includes("morning glory") || name.includes("pak boong") || name.includes("kangkung")) imgPath = "/images/morning-glory.png";
-                                  else if (name.includes("rice") || name.includes("jasmine")) imgPath = "/images/jasmine-rice.png";
-                                  else if (name.includes("egg")) imgPath = "/images/cage-free-eggs.png";
+                                    if(item.image != null && item.image != ""){
+                                        imgPath = item.image
+                                    }
                                 %>
                                 <img src="<%= imgPath %>" alt="<%= item.name %>" class="w-full h-full object-cover">
                             </div>
