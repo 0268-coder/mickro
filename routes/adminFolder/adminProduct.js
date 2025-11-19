@@ -1,216 +1,168 @@
-const express = require('express')
-const router = express.Router()
-const upload = require(`../../multer`)
-const path = require('path')
-const fs = require('fs/promises')
-const productModel = require('../../models/product')
-const IMAGE_DIR = 'public/images/product'
-const { authenticateAdmin, authenticateUser } = require('../../middleware/auth');
+const express = require('express');
+const router = express.Router();
+const upload = require(`../../multer`);
+const path = require('path');
+const fs = require('fs/promises'); // Use promises version
+const productModel = require('../../models/product');
+const IMAGE_DIR = 'public/images/product';
 
-// --- /admin/product (Base Resource: List & Create) ---
-router
-    .route("/")
+//cut public from images
+function sepPublicPath(fullPath) {
+    if (!fullPath) return null;
+
+    // 1. Remove 'public' from the start
+    // path.join creates 'public/' on Mac/Linux and 'public\' on Windows
+    const prefixToRemove = 'public' + path.sep; 
     
-    // GET /admin/product (List all products)
-    .get(async (req, res) => {
-        const allProduct = await productModel.getAllProduct()
-        res.render("admin/product/product",{product:allProduct});
-    })     
-
-router. 
-    route("/add")
-    .get(async(req,res)=>{
-        res.render("admin/product/addPage")
-    })
-    // POST /admin/product (Add a new product - handles form submission)
-    .post(upload.single('image'), async (req, res) => {
-        const file = req.file; 
-    
-        if (file) {
-            console.log("Original Filename:", file.originalname);
-            console.log("MIME Type:", file.mimetype);
-            console.log("Saved Path on Server:", file.path); // The temporary path/filename
-            console.log("File Size:", file.size);
-            
-        } else 
-        {
-            console.log("No file was attached to the request.");
-        }
-        
-            const { name, price, length, height, width} = req.body;
-
-            const finalImagePath = sepPublicPath(file)            
-            const result = await productModel.addProduct(name, price, length, height, width, finalImagePath);
-            console.log("New Product Created:", result);
-            res.redirect('/admin/product'); // Redirect to the list view
-    });
-
-// --- /admin/product/update/:id (Specific Resource: Fetch & Update) ---
-router
-    .route("/update/:id")
-    .get(async (req, res) => {
-        const id = req.params.id;
-        try {
-            const product = await productModel.getProductByID(id);
-            
-            if (!product) {
-                return res.status(404).json({ message: "Product not found." });
-            }
-            
-            // NOTE: Render the edit form in a real application
-            console.log("get product/id",product)
-            res.render("admin/product/updatePage",{product: product});
-        } catch (error) {
-            console.error("Error fetching product for update:", error);
-            res.status(500).json({ message: "Failed to fetch product for editing." });
-        }
-    })
-    
-    // POST /admin/product/update/:id (Process update form submission)
-    .post(upload.single('image'), async (req, res) => {
-        const id = req.params.id;
-        const file = req.file; // New file metadata (or undefined)
-        const { name, price, length, height, width } = req.body;
-        
-        let pathImageToStore = null; // Path to update in the database
-        let oldImagePathOnDisk = null; // Path of the file to potentially delete
-
-
-        try {
-            // 1. Check for Old Image Path (before updating)
-            // You need to know the existing image path to delete it later
-            const existingProduct = await productModel.getProductByID(id);
-            const oldImagePathDB = existingProduct ? existingProduct.image : null;
-            // 2. Handle New File Upload
-            if (file) {
-                // A. Calculate the final file name (e.g., product.ID.ext)
-                const tempFileName = req.tempFileName || file.filename;
-                const fileExtension = path.extname(file.originalname);
-                const finalImageName = `product.${id}${fileExtension}`;
-                
-                const oldPath = path.join(IMAGE_DIR, tempFileName);
-                const newPath = path.join(IMAGE_DIR, finalImageName);
-                console.log('old',oldPath,'new',newPath)
-
-                // B. Rename the file using the final Product ID
-                await fs.rename(oldPath, newPath);
-
-                // C. Set the database path (use sepPublicPath to ensure web-friendly format)
-                // Note: sepPublicPath expects the Multer file object
-                // We'll pass a mock object here based on the final name if sepPublicPath relies on file.path
-                // Simpler: Just store the finalImageName string if that's your convention
-                pathImageToStore = sepPublicPath({path: newPath, originalname: finalImageName}); 
-                
-                // 3. Delete Old Image (if a new one was uploaded)
-                if (oldImagePathDB) {
-                    oldImagePathOnDisk = path.join(IMAGE_DIR, path.basename(oldImagePathDB));
-                    await fs.unlink(oldImagePathOnDisk).catch(err => console.warn(`Failed to delete old image ${oldImagePathOnDisk}: ${err.message}`));
-                }
-
-            } else {
-                // If NO new file was uploaded, retain the existing database path
-                pathImageToStore = oldImagePathDB;
-            }
-
-            // 4. Update Database
-            const result = await productModel.updateProductByID(id,name,price,length,height,width,pathImageToStore);
-            
-            if (result.affectedRows === 0) {
-                 return res.status(404).send(`Product ID ${id} not found or no changes made.`);
-            }
-            
-            console.log(`Product ID ${id} updated.`);
-            res.redirect('/admin/product'); 
-            
-        } catch (error) {
-            console.error("Error updating product:", error);
-            
-            // Clean up the NEWLY uploaded file if the DB update failed
-            if (file) {
-                 const tempPath = path.join(IMAGE_DIR, req.tempFileName || file.filename);
-                 await fs.unlink(tempPath).catch(err => console.error("Cleanup failed:", err));
-            }
-            
-            res.status(500).send("Error updating product. Check server logs.");
-        }
-    });
-
-
-// --- POST /admin/product/delete/:id (Delete Resource) ---
-// Note: We keep this as a separate router.post since DELETE is not part of the standard resource update/fetch pattern
-router.post("/delete/:id", async (req, res) => {
-    const { id } = req.params;
-
-    try {
-       
-        deleteImage(id)
-
-        // 2. Delete the product record from the database
-        const result = await productModel.deleteProductByID(id);
-
-        if (result.affectedRows === 0) {
-            return res.status(404).send(`Product ID ${id} not found.`);
-        }
-        console.log(`Product ID ${id} deleted successfully.`);
-        res.redirect('/admin/product'); 
-
-    } catch (error) {
-        // If the file delete fails (e.g., file doesn't exist), we log a warning but proceed
-        // If the DB delete fails, we catch the error here.
-        console.error(`Error deleting product ID ${id}:`, error.message);
-        res.status(500).send("Error processing deletion. Check server logs.");
-    }
-});
-
-function sepPublicPath(file) {
-    if (!file || !file.path) {
-        // Handle case where req.file is undefined or null gracefully
-        return null;
-    }
-
-    const fullPath = file.path; 
-    console.log(fullPath)
-    // Define the prefix to remove: 'public/' or 'public\'
-    // path.join('public', path.sep) handles the correct separator for the OS.
-    const prefixToRemove = path.join('public', path.sep); 
-    console.log("prefixtoremove",prefixToRemove)
     let relativePath = fullPath;
-    
-    // Check if the path starts with the expected prefix and remove it
     if (fullPath.startsWith(prefixToRemove)) {
         relativePath = fullPath.substring(prefixToRemove.length);
     }
-    console.log("relative path",relativePath)
-    // Convert backslashes (Windows) to forward slashes (web standard)
-    //const webPath = relativePath.replace(/\\/g, '/');
 
-    console.log("Full Path:", fullPath);
-    console.log("Final Image Path:", relativePath);
-    
-    return relativePath;
+    // 2. CRITICAL: Force forward slashes for URLs (Standardizes Windows paths)
+    return relativePath.split(path.sep).join('/'); 
 }
 
-async function deleteImage(id){
-     // 1. Get the image path from the database BEFORE deletion
-    // Assume this function returns the product's image path string or null
-    const productData = await productModel.getImagePathByID(id);
+//delete image
+async function deleteImage(id) {
+    try {
+        // Get path from DB
+        const productData = await productModel.getImagePathByID(id);
+        if (!productData || !productData.image) return;
 
-    let imagePathToDelete = null;
-    console.log("Product_DATA",productData) 
-    if (productData && productData.image) {
-        imagePathToDelete = productData.image;
-    }
-    // 3. Delete the file from the disk (if a path was found)
-    console.log("imagePath to delete",imagePathToDelete)
-    if (imagePathToDelete) {
-        // Construct the full path to the file on the server
-        // Note: We use path.basename to ensure we only use the filename stored in DB
-        const fullPath = path.join(IMAGE_DIR, path.basename(imagePathToDelete));
-        console.log("FullPath",fullPath)
-            
-        // fs.promises.unlink deletes the file
+        // Construct full system path
+        // productData.image is like "images/product/foo.jpg"
+        // We need to add "public/" back to it to find it on the disk
+        const fullPath = path.join('public', productData.image);
+
+        // Check if file exists before trying to delete
+        await fs.access(fullPath); 
         await fs.unlink(fullPath);
-        console.log(`Successfully deleted file: ${fullPath}`);
+        console.log(`Deleted file: ${fullPath}`);
+    } catch (error) {
+        // It is okay if file doesn't exist (ENOENT), otherwise log it
+        if (error.code !== 'ENOENT') {
+            console.warn(`Failed to delete image for ID ${id}:`, error.message);
+        }
     }
 }
+
+// ================= ROUTES =================
+
+router.route("/")
+    .get(async (req, res) => {
+        try {
+            const allProduct = await productModel.getAllProduct();
+            res.render("admin/product/product", { product: allProduct });
+        } catch (err) {
+            console.error(err);
+            res.status(500).send("Database Error");
+        }
+    });
+
+router.route("/add")
+    .get((req, res) => {
+        res.render("admin/product/addPage");
+    })
+    .post(upload.single('image'), async (req, res) => {
+        try {
+            const file = req.file;
+            const { name, price, length, height, width } = req.body;
+
+            let finalImagePath = null;
+            if (file) {
+                // Pass file.path (string) to the helper
+                finalImagePath = sepPublicPath(file.path); 
+            }
+
+            await productModel.addProduct(name, price, length, height, width, finalImagePath);
+            res.redirect('/admin/product');
+        } catch (err) {
+            console.error("Add Product Error:", err);
+            res.status(500).send("Failed to add product.");
+        }
+    });
+
+router.route("/update/:id")
+    .get(async (req, res) => {
+        try {
+            const product = await productModel.getProductByID(req.params.id);
+            if (!product) return res.status(404).send("Product not found.");
+            res.render("admin/product/updatePage", { product });
+        } catch (error) {
+            console.error(error);
+            res.status(500).send("Server Error");
+        }
+    })
+    .post(upload.single('image'), async (req, res) => {
+        const id = req.params.id;
+        const file = req.file;
+        const { name, price, length, height, width } = req.body;
+
+        try {
+            let pathImageToStore = null; // New path to save to DB
+
+            // 1. Handle File Upload (If a new file exists)
+            if (file) {
+                // A. Get the old image path from DB so we can delete it later
+                const existingProduct = await productModel.getProductByID(id);
+                const oldDbImage = existingProduct ? existingProduct.image : null;
+
+                // B. Rename the NEW file to be cleaner (Optional step you had)
+                // Multer saves as "fieldname-timestamp.ext"
+                // We want "product.ID.ext"
+                const fileExtension = path.extname(file.originalname);
+                const newFileName = `product.${id}${fileExtension}`;
+                const newPath = path.join(IMAGE_DIR, newFileName);
+
+                // Rename the file on disk
+                await fs.rename(file.path, newPath);
+
+                // C. Generate web-ready path
+                pathImageToStore = sepPublicPath(newPath);
+
+                // D. Delete the OLD image from disk
+                if (oldDbImage) {
+                   const oldFullPath = path.join('public', oldDbImage);
+                   await fs.unlink(oldFullPath).catch(err => {}); // Ignore if old file missing
+                }
+            } else {
+                // If no new file, keep the old path from DB
+                // (You might need to fetch it again if your DB update requires the image field)
+                const existingProduct = await productModel.getProductByID(id);
+                pathImageToStore = existingProduct.image;
+            }
+
+            // 2. Update Database
+            await productModel.updateProductByID(id, name, price, length, height, width, pathImageToStore);
+            res.redirect('/admin/product');
+
+        } catch (error) {
+            console.error("Update Error:", error);
+            // Cleanup: If the process failed but we uploaded a file, delete the orphan file
+            if (file) await fs.unlink(file.path).catch(() => {});
+            res.status(500).send("Error updating product");
+        }
+    });
+
+router.post("/delete/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+        // 1. Delete the image first
+        await deleteImage(id); // <--- ADDED AWAIT HERE
+
+        // 2. Delete from DB
+        const result = await productModel.deleteProductByID(id);
+        
+        if (result.affectedRows === 0) {
+             return res.status(404).send(`Product ID ${id} not found.`);
+        }
+        
+        res.redirect('/admin/product');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Error processing deletion.");
+    }
+});
+
 module.exports = router;

@@ -13,4 +13,9 @@ function authenticateAdmin(req, res, next){
     next();
 }
 
-module.exports = { authenticateUser, authenticateAdmin };
+function authenticateStaff(req,res,next){
+    if(!req.session.user.isStaff){
+        return res.redirect("/login");
+    }
+}
+module.exports = { authenticateUser, authenticateAdmin, authenticateStaff };

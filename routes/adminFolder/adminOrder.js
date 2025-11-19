@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
-const db = require('../../db')
+const {userConnection,adminConnection,staffConnection} = require('../../db')
+const db = adminConnection
 
 // GET all orders for admin
 router.get("/", async (req, res) => {

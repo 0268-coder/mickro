@@ -1,7 +1,8 @@
 // routes/review.js
 const express = require('express')
 const router = express.Router()
-const db = require('../db')
+const{userConnection,adminConnection,staffConnection} = require('../db')
+const db = userConnection
 
 // GET /review/:orderId – show review form for that order
 router.get('/:orderId', async (req, res) => {
@@ -35,7 +36,7 @@ router.post('/:orderId', async (req, res) => {
         await db.query(
             `INSERT INTO Review
                 (User_ID, Review_date, Review_text, Rating)
-             VALUES (?, NOW(), ?, ?)`,
+             VALUES (?, null, ?, ?)`,
             [userid,comment, rating]
         )
 

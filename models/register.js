@@ -1,4 +1,5 @@
-const connection = require('../db');
+const {userConnection,adminConnection,staffConnection} = require('../db')
+const connection = userConnection
 
 const registerModel = {
     // add Register queries to database

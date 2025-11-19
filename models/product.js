@@ -1,4 +1,6 @@
-const connection = require('../db')
+const {userConnection,adminConnection,staffConnection} = require('../db')
+const adconnection = adminConnection
+const connection = userConnection
 
 const productModel = {
     getAllProduct: async()=>{
@@ -21,7 +23,7 @@ const productModel = {
     },
 
     addProduct: async(name,price,length,height,width,image)=>{
-        const [result] = await connection.query(`
+        const [result] = await adconnection.query(`
             INSERT INTO Product(Product_Name,Product_Price,Length,Height,Width,image)
             VALUES(?,?,?,?,?,?)`,
         [name,price,length,height,width,image])
@@ -31,7 +33,7 @@ const productModel = {
     
     updateProductByID: async(id,name,price,length,height,width,image)=>{
         console.log("updateProductModel",name,price,length,height,width,image,id)
-        const[result] = await connection.query(`
+        const[result] = await adconnection.query(`
             UPDATE product
             SET 
                 Product_Name = ?,
@@ -46,7 +48,7 @@ const productModel = {
     },
     
     deleteProductByID: async(id)=>{
-        const [result] = await connection.query(`
+        const [result] = await adconnection.query(`
             DELETE FROM Product
             WHERE Product_ID = ?`,
         [id])

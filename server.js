@@ -2,7 +2,8 @@ const express = require('express')
 const path = require('path')
 const app = express()
 const addressModel = require("./models/address");
-const db = require('./db')
+const {userConnection,adminConnection,staffConnection} = require('./db.js')
+const {authenticateUser,authenticateAdmin,authenticateStaff} = require('./middleware/auth.js')
 //require to use layout
 const engine = require('ejs-mate')
 //require session
@@ -32,24 +33,6 @@ app.use((req,res,next)=>{
     next()
 })
 
-
-//middleware to check if user is logged in
-function authenticateUser(req, res, next){
-    console.log("funciton authenticateUser")
-    if(!req.session.user) {
-        return res.redirect("/login");
-    }
-    next();
-};
-
-function authenticateAdmin(req, res, next){
-    if(!req.session.user.isAdmin) {
-        return res.redirect("/login");
-    }
-    next();
-};
-
-
 const registerRouter = require("./routes/register");
 const loginRouter = require("./routes/login")
 const addressRouter = require("./routes/address");
@@ -78,7 +61,7 @@ app.get("/", authenticateUser, async (req,res)=>{
 
     const userAddr = await addressModel.getAddress(req.session.user.id);
     req.session.address = userAddr
-    const [allProducts] = await db.query('SELECT * FROM Product')
+    const [allProducts] = await userConnection.query('SELECT * FROM Product')
 
     res.render("product/product", { userAddress: userAddr, user: req.session.user,product: allProducts })
 });
@@ -86,28 +69,28 @@ app.get("/", authenticateUser, async (req,res)=>{
 app.get("/admin", authenticateUser,authenticateAdmin, async (req,res)=>{
     try {
         // Fetch all orders
-        const [orders] = await db.query(`
+        const [orders] = await adminConnection.query(`
             SELECT 
                 Order_ID,
                 Full_Name,
                 Phone,
                 Address,
                 Order_Date,
-                Payment_Method,
+                Payment_Method_ID,
                 Order_Total
             FROM orders
             ORDER BY Order_Date DESC
         `)
         
         // Calculate total revenue
-        const [revenueResult] = await db.query(`
+        const [revenueResult] = await adminConnection.query(`
             SELECT COALESCE(SUM(Order_Total), 0) as totalRevenue
             FROM orders
         `)
         const totalRevenue = revenueResult[0].totalRevenue
         
         // Calculate today's revenue
-        const [todayRevenueResult] = await db.query(`
+        const [todayRevenueResult] = await adminConnection.query(`
             SELECT COALESCE(SUM(Order_Total), 0) as todayRevenue
             FROM orders
             WHERE DATE(Order_Date) = CURDATE()
@@ -115,14 +98,14 @@ app.get("/admin", authenticateUser,authenticateAdmin, async (req,res)=>{
         const todayRevenue = todayRevenueResult[0].todayRevenue
         
         // Count all orders
-        const [orderCountResult] = await db.query(`
+        const [orderCountResult] = await adminConnection.query(`
             SELECT COUNT(*) as totalOrders
             FROM orders
         `)
         const totalOrders = orderCountResult[0].totalOrders
         
         // Count today's orders
-        const [todayOrdersResult] = await db.query(`
+        const [todayOrdersResult] = await adminConnection.query(`
             SELECT COUNT(*) as todayOrders
             FROM orders
             WHERE DATE(Order_Date) = CURDATE()
@@ -130,7 +113,7 @@ app.get("/admin", authenticateUser,authenticateAdmin, async (req,res)=>{
         const todayOrders = todayOrdersResult[0].todayOrders
         
         // Count all users
-        const [userCountResult] = await db.query(`
+        const [userCountResult] = await adminConnection.query(`
             SELECT COUNT(*) as totalUsers
             FROM user
         `)
@@ -139,7 +122,7 @@ app.get("/admin", authenticateUser,authenticateAdmin, async (req,res)=>{
         // Count today's new users (assuming users have a date field, or using ID as proxy)
         // If user table has a created_at or registration_date field, use that
         // For now, I'll count users with today's date if DOB is used as registration
-        const [todayUsersResult] = await db.query(`
+        const [todayUsersResult] = await adminConnection.query(`
             SELECT COUNT(*) as todayUsers
             FROM user
             WHERE DATE(DOB) = CURDATE()
@@ -147,7 +130,7 @@ app.get("/admin", authenticateUser,authenticateAdmin, async (req,res)=>{
         const todayUsers = todayUsersResult[0].todayUsers
         
         // Count all products
-        const [productCountResult] = await db.query(`
+        const [productCountResult] = await adminConnection.query(`
             SELECT COUNT(*) as totalProducts
             FROM product
         `)

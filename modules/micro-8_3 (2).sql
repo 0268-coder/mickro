@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:8889
--- Generation Time: Nov 19, 2025 at 08:28 AM
+-- Generation Time: Nov 19, 2025 at 12:11 PM
 -- Server version: 8.0.40
 -- PHP Version: 8.3.14
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `micro-8.2`
+-- Database: `micro-8.3`
 --
 
 DELIMITER $$
@@ -82,8 +82,8 @@ INSERT INTO `login` (`Login_ID`, `Username`, `Password`, `Status`, `User_ID`) VA
 --
 
 CREATE TABLE `orderitems` (
-  `OrderItem_ID` int NOT NULL,
-  `Order_ID` int NOT NULL,
+  `OrderItem_ID` bigint NOT NULL,
+  `Order_ID` bigint NOT NULL,
   `Product_ID` int NOT NULL,
   `Quantity` int NOT NULL,
   `Unit_Price` decimal(10,2) NOT NULL
@@ -158,57 +158,6 @@ INSERT INTO `orderitems` (`OrderItem_ID`, `Order_ID`, `Product_ID`, `Quantity`, 
 (62, 32, 2, 2, 75.00),
 (63, 32, 6, 1, 999999.00);
 
---
--- Triggers `orderitems`
---
-DELIMITER $$
-CREATE TRIGGER `trg_orderitems_after_delete_update_totals` AFTER DELETE ON `orderitems` FOR EACH ROW BEGIN
-    DECLARE v_subtotal DECIMAL(10,2);
-
-    -- Recalculate subtotal for the remaining items
-    SELECT SUM(Quantity * Unit_Price)
-    INTO v_subtotal
-    FROM orderitems
-    WHERE Order_ID = OLD.Order_ID;
-
-    -- If no items remain, subtotal becomes 0
-    IF v_subtotal IS NULL THEN
-        SET v_subtotal = 0;
-    END IF;
-
-    -- Update orders table
-    UPDATE orders
-    SET
-        Order_Subtotal = v_subtotal,
-        Order_Total = v_subtotal + Delivery_Fee
-    WHERE Order_ID = OLD.Order_ID;
-END
-$$
-DELIMITER ;
-DELIMITER $$
-CREATE TRIGGER `trg_orderitems_after_insert_update_totals` AFTER INSERT ON `orderitems` FOR EACH ROW BEGIN
-    DECLARE v_subtotal DECIMAL(10,2);
-
-    -- Calculate subtotal
-    SELECT SUM(Quantity * Unit_Price)
-    INTO v_subtotal
-    FROM orderitems
-    WHERE Order_ID = NEW.Order_ID;
-
-    IF v_subtotal IS NULL THEN 
-        SET v_subtotal = 0;
-    END IF;
-
-    -- Update the orders table
-    UPDATE orders
-    SET 
-        Order_Subtotal = v_subtotal,
-        Order_Total = v_subtotal + Delivery_Fee
-    WHERE Order_ID = NEW.Order_ID;
-END
-$$
-DELIMITER ;
-
 -- --------------------------------------------------------
 
 --
@@ -216,7 +165,7 @@ DELIMITER ;
 --
 
 CREATE TABLE `orders` (
-  `Order_ID` int NOT NULL,
+  `Order_ID` bigint NOT NULL,
   `User_ID` int DEFAULT NULL,
   `Order_Subtotal` decimal(10,2) NOT NULL,
   `Delivery_Fee` decimal(10,2) NOT NULL,
@@ -274,7 +223,7 @@ INSERT INTO `orders` (`Order_ID`, `User_ID`, `Order_Subtotal`, `Delivery_Fee`, `
 
 CREATE TABLE `payment_method` (
   `Payment_Method_ID` int NOT NULL,
-  `Method_Type` enum('Cash','Credit_card') CHARACTER SET utf8mb4  NOT NULL DEFAULT 'Cash'
+  `Method_Type` enum('Cash','Credit_card') CHARACTER SET utf8mb4 NOT NULL DEFAULT 'Cash'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 
 --
@@ -361,6 +310,28 @@ INSERT INTO `review` (`Review_No`, `User_ID`, `Review_date`, `Review_text`, `Rat
 -- Triggers `review`
 --
 DELIMITER $$
+CREATE TRIGGER `trg_review_after_insert_update_avg` AFTER INSERT ON `review` FOR EACH ROW BEGIN
+    DECLARE v_avg   DECIMAL(3,2);
+    DECLARE v_count INT;
+
+    IF NEW.User_ID IS NOT NULL THEN
+
+        SELECT AVG(Rating), COUNT(*)
+        INTO v_avg, v_count
+        FROM review
+        WHERE User_ID = NEW.User_ID;
+
+  
+        INSERT INTO user_rating_summary (User_ID, Avg_Rating, Review_Count)
+        VALUES (NEW.User_ID, v_avg, v_count)
+        ON DUPLICATE KEY UPDATE
+            Avg_Rating   = v_avg,
+            Review_Count = v_count;
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
 CREATE TRIGGER `trg_review_before_insert_set_date` BEFORE INSERT ON `review` FOR EACH ROW BEGIN
     IF NEW.Review_Date IS NULL THEN
         SET NEW.Review_Date = NOW();
@@ -399,6 +370,30 @@ INSERT INTO `user` (`ID`, `Fname`, `Lname`, `Address`, `DOB`, `Email`, `PhoneNum
 (33, 'Mick', 'Wolff', 'NAHEE', '2025-10-26', 'MW@gmail.cum', '0999999999'),
 (34, 'fourty', 'fifty', 'siit', '2025-11-05', 'seventy@gmail.com', '0987654432');
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_rating_summary`
+--
+
+CREATE TABLE `user_rating_summary` (
+  `User_ID` int NOT NULL,
+  `Avg_Rating` decimal(3,2) NOT NULL,
+  `Review_Count` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
+
+--
+-- Dumping data for table `user_rating_summary`
+--
+
+INSERT INTO `user_rating_summary` (`User_ID`, `Avg_Rating`, `Review_Count`) VALUES
+(2, 4.00, 1),
+(3, 5.00, 1),
+(4, 5.00, 1),
+(5, 4.50, 2),
+(32, 4.00, 1),
+(33, 3.25, 4);
+
 --
 -- Indexes for dumped tables
 --
@@ -423,7 +418,8 @@ ALTER TABLE `orderitems`
 -- Indexes for table `orders`
 --
 ALTER TABLE `orders`
-  ADD PRIMARY KEY (`Order_ID`);
+  ADD PRIMARY KEY (`Order_ID`),
+  ADD KEY `fk_orders_user` (`User_ID`);
 
 --
 -- Indexes for table `payment_method`
@@ -452,6 +448,12 @@ ALTER TABLE `user`
   ADD UNIQUE KEY `Email` (`Email`);
 
 --
+-- Indexes for table `user_rating_summary`
+--
+ALTER TABLE `user_rating_summary`
+  ADD PRIMARY KEY (`User_ID`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -465,13 +467,13 @@ ALTER TABLE `login`
 -- AUTO_INCREMENT for table `orderitems`
 --
 ALTER TABLE `orderitems`
-  MODIFY `OrderItem_ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
+  MODIFY `OrderItem_ID` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `Order_ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `Order_ID` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT for table `payment_method`
@@ -515,10 +517,22 @@ ALTER TABLE `orderitems`
   ADD CONSTRAINT `orderitems_ibfk_2` FOREIGN KEY (`Product_ID`) REFERENCES `product` (`Product_ID`);
 
 --
+-- Constraints for table `orders`
+--
+ALTER TABLE `orders`
+  ADD CONSTRAINT `fk_orders_user` FOREIGN KEY (`User_ID`) REFERENCES `user` (`ID`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
 -- Constraints for table `review`
 --
 ALTER TABLE `review`
   ADD CONSTRAINT `review_ibfk_2` FOREIGN KEY (`User_ID`) REFERENCES `user` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `user_rating_summary`
+--
+ALTER TABLE `user_rating_summary`
+  ADD CONSTRAINT `fk_urs_user` FOREIGN KEY (`User_ID`) REFERENCES `user` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

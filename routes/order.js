@@ -1,7 +1,6 @@
 // routes/order.js
 const express = require('express')
 const router = express.Router()
-const db = require('../db')
 
 // POST /order/:orderId/received
 router.post('/:orderId/received', async (req, res) => {

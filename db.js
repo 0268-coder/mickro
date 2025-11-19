@@ -3,7 +3,7 @@ require('dotenv').config()
 
 //setup mysql server
 //createPool so that it not multiple create connection
-const connection = mysql.createPool({
+const userConnection = mysql.createPool({
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
     user: process.env.DB_USER,
@@ -14,4 +14,26 @@ const connection = mysql.createPool({
     queueLimit: 0          // 0 = unlimited queued requests
 }).promise();
 
-module.exports = connection;
+const adminConnection = mysql.createPool({
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    user: process.env.DB_ADMINUSER,
+    password: process.env.DB_ADMINPASSWORD,
+    database: process.env.DB_NAME,
+    waitForConnections: true,
+    connectionLimit: 10,   // how many connections to keep open
+    queueLimit: 0 
+}).promise()
+
+const staffConnection = mysql.createPool({
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    user: process.env.DB_STAFFUSER,
+    password: process.env.DB_STAFFPASSWORD,
+    database: process.env.DB_NAME,
+    waitForConnections: true,
+    connectionLimit: 10,   // how many connections to keep open
+    queueLimit: 0 
+}).promise()
+
+module.exports = {userConnection, adminConnection, staffConnection};

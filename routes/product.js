@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../db')
+const{userConnection,adminConnection,staffConnection} = require('../db')
+const db = userConnection
 
 //list all product
 router.get('/',async(req,res)=>{

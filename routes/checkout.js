@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
-const registerModels = require('../models/register')
-const db = require('../db')
+const {userConnection,adminConnection,staffConnection} = require('../db')
+const db = userConnection
 
 // Fixed delivery fee (same as cart.js)
 const DELIVERY_FEE = 15.00
@@ -88,6 +88,10 @@ router.post('/', async (req, res) => {
         return res.redirect('/cart')
     }
     const { fullName, address, phone, paymentMethod } = req.body
+
+    if (paymentMethod === ""){
+        paymentMethod = null
+    }
 
     const connection = db // in case you're using a pool / transaction, adjust here
 
