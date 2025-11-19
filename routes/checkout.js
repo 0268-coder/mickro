@@ -87,7 +87,7 @@ router.post('/', async (req, res) => {
         // Nothing to checkout
         return res.redirect('/cart')
     }
-    const { fullName, address, phone, paymentMethod } = req.body
+    let { fullName, address, phone, paymentMethod } = req.body
 
     if (paymentMethod === ""){
         paymentMethod = null
@@ -114,6 +114,18 @@ router.post('/', async (req, res) => {
 
         const total = subtotal + DELIVERY_FEE
 
+        let paymentMethodId = null
+        if (paymentMethod) {
+            const [paymentRows] = await connection.query(
+                `Select Payment_Method_ID from payment_method where Method_Type = ?`, [
+                    paymentMethod
+                ]
+            )
+            if (paymentRows.length > 0) {
+                paymentMethodId = paymentRows[0].Payment_Method_ID
+            }
+        }
+
         // OPTIONAL: If you have user login
         const userId = req.session.user ? req.session.user.id : null
 
@@ -131,7 +143,7 @@ router.post('/', async (req, res) => {
                 fullName,
                 address,
                 phone,
-                paymentMethod
+                paymentMethodId
             ]
         )
 

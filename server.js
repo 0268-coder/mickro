@@ -61,7 +61,7 @@ app.get("/", authenticateUser, async (req,res)=>{
 
     const userAddr = await addressModel.getAddress(req.session.user.id);
     req.session.address = userAddr
-    const [allProducts] = await userConnection.query('SELECT * FROM Product')
+    const [allProducts] = await adminConnection.query('SELECT * FROM Product')
 
     res.render("product/product", { userAddress: userAddr, user: req.session.user,product: allProducts })
 });
@@ -76,7 +76,7 @@ app.get("/admin", authenticateUser,authenticateAdmin, async (req,res)=>{
                 Phone,
                 Address,
                 Order_Date,
-                Payment_Method_ID,
+                Payment_Method,
                 Order_Total
             FROM orders
             ORDER BY Order_Date DESC

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:8889
--- Generation Time: Nov 19, 2025 at 12:11 PM
+-- Generation Time: Nov 19, 2025 at 03:55 PM
 -- Server version: 8.0.40
 -- PHP Version: 8.3.14
 
@@ -59,7 +59,7 @@ CREATE TABLE `login` (
   `Password` varbinary(100) NOT NULL,
   `Status` varchar(50) DEFAULT 'user',
   `User_ID` int DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `login`
@@ -87,76 +87,41 @@ CREATE TABLE `orderitems` (
   `Product_ID` int NOT NULL,
   `Quantity` int NOT NULL,
   `Unit_Price` decimal(10,2) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `orderitems`
 --
 
 INSERT INTO `orderitems` (`OrderItem_ID`, `Order_ID`, `Product_ID`, `Quantity`, `Unit_Price`) VALUES
-(1, 1, 5, 1, 220.00),
-(2, 2, 5, 1, 220.00),
-(3, 3, 5, 1, 220.00),
-(4, 4, 5, 1, 220.00),
-(5, 5, 5, 3, 220.00),
-(6, 6, 5, 1, 220.00),
-(7, 7, 5, 1, 220.00),
-(8, 8, 2, 1, 75.00),
-(9, 9, 5, 1, 220.00),
-(10, 10, 2, 1, 75.00),
-(11, 10, 3, 1, 25.00),
-(12, 10, 4, 1, 165.00),
-(13, 11, 3, 1, 25.00),
-(14, 11, 2, 1, 75.00),
-(15, 11, 1, 1, 189.00),
-(16, 12, 1, 1, 189.00),
-(17, 12, 2, 3, 75.00),
-(18, 13, 2, 3, 75.00),
-(19, 14, 2, 4, 75.00),
-(20, 14, 4, 1, 165.00),
-(21, 14, 3, 1, 25.00),
-(22, 14, 1, 1, 189.00),
-(23, 14, 5, 1, 220.00),
-(24, 15, 3, 3, 25.00),
-(25, 15, 4, 10, 165.00),
-(26, 15, 1, 1, 189.00),
-(27, 15, 5, 1, 220.00),
-(28, 16, 1, 2, 189.00),
-(29, 16, 3, 3, 25.00),
-(30, 17, 1, 4, 189.00),
-(31, 17, 2, 11, 75.00),
-(32, 17, 3, 1, 25.00),
-(33, 18, 1, 14, 189.00),
-(34, 18, 2, 2, 75.00),
-(35, 18, 3, 2, 25.00),
-(36, 18, 4, 3, 165.00),
-(37, 18, 5, 1, 220.00),
-(38, 19, 1, 1, 189.00),
-(39, 19, 5, 8, 220.00),
-(40, 20, 1, 8, 189.00),
-(41, 21, 3, 4, 25.00),
-(42, 21, 2, 1, 75.00),
-(43, 21, 1, 1, 189.00),
-(44, 22, 2, 1, 75.00),
-(45, 22, 3, 4, 25.00),
-(46, 23, 3, 1, 25.00),
-(47, 23, 2, 1, 75.00),
-(48, 23, 1, 1, 189.00),
-(49, 24, 6, 4, 999999.00),
-(50, 25, 6, 1, 999999.00),
-(51, 25, 5, 1, 220.00),
-(52, 25, 1, 1, 189.00),
-(53, 25, 2, 1, 75.00),
-(54, 29, 6, 1, 999999.00),
-(55, 29, 3, 13, 25.00),
-(56, 30, 6, 2, 999999.00),
-(57, 30, 4, 2, 165.00),
-(58, 30, 7, 1, 99.00),
-(59, 31, 1, 7, 189.00),
-(60, 31, 9, 2, 999.00),
-(61, 31, 6, 1, 999999.00),
-(62, 32, 2, 2, 75.00),
-(63, 32, 6, 1, 999999.00);
+(1, 1, 2, 11, 75.00);
+
+--
+-- Triggers `orderitems`
+--
+DELIMITER $$
+CREATE TRIGGER `trg_orderitems_after_insert_update_totals` AFTER INSERT ON `orderitems` FOR EACH ROW BEGIN
+    DECLARE v_subtotal DECIMAL(10,2);
+
+    -- Calculate subtotal
+    SELECT SUM(Quantity * Unit_Price)
+    INTO v_subtotal
+    FROM orderitems
+    WHERE Order_ID = NEW.Order_ID;
+
+    IF v_subtotal IS NULL THEN 
+        SET v_subtotal = 0;
+    END IF;
+
+    -- Update the orders table
+    UPDATE orders
+    SET 
+        Order_Subtotal = v_subtotal,
+        Order_Total = v_subtotal + Delivery_Fee
+    WHERE Order_ID = NEW.Order_ID;
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -173,47 +138,16 @@ CREATE TABLE `orders` (
   `Full_Name` varchar(255) NOT NULL,
   `Address` text NOT NULL,
   `Phone` varchar(50) NOT NULL,
-  `Payment_Method` varchar(100) NOT NULL,
+  `Payment_Method` int NOT NULL,
   `Order_Date` datetime NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `orders`
 --
 
 INSERT INTO `orders` (`Order_ID`, `User_ID`, `Order_Subtotal`, `Delivery_Fee`, `Order_Total`, `Full_Name`, `Address`, `Phone`, `Payment_Method`, `Order_Date`) VALUES
-(1, NULL, 220.00, 15.00, 235.00, 'asd', 'Sirindhorn International Institute of Technology', '123', '', '2025-11-16 13:09:27'),
-(2, NULL, 220.00, 15.00, 235.00, 'asd', 'Sirindhorn International Institute of Technology', '123', '', '2025-11-16 13:11:04'),
-(3, NULL, 220.00, 15.00, 235.00, 'asd', 'Sirindhorn International Institute of Technology', '123', '', '2025-11-16 13:13:29'),
-(4, NULL, 220.00, 15.00, 235.00, 'Rangsimann Sattayasrom', 'Sirindhorn International Institute of Technology', '123123123123', '', '2025-11-16 13:28:32'),
-(5, NULL, 660.00, 15.00, 675.00, 'Rangsdasd', 'Sirindhorn International Institute of Technology', '123123f', '', '2025-11-16 13:33:27'),
-(6, NULL, 220.00, 15.00, 235.00, 'MickAuan', 'Sirindhorn International Institute of Technology', '978345', '', '2025-11-16 13:37:07'),
-(7, NULL, 220.00, 15.00, 235.00, 'asd', 'Sirindhorn International Institute of Technology', 'asdasd', '', '2025-11-16 13:39:18'),
-(8, NULL, 75.00, 15.00, 90.00, 'asdasd', 'Sirindhorn International Institute of Technology', 'asdasd', '', '2025-11-16 13:42:18'),
-(9, NULL, 220.00, 15.00, 235.00, 'Lord Pepsi Coke', 'Sirindhorn International Institute of Technology', '123123123123', '', '2025-11-16 13:58:44'),
-(10, 32, 265.00, 15.00, 280.00, 'Ratchanon Wongwitutai', 'อยู่ในใจมิ๊ก', '0985848369', 'Cash', '2025-11-16 22:02:35'),
-(11, 32, 289.00, 15.00, 304.00, 'Ratchanon Wongwitutai', 'อยู่ในใจมิ๊ก', '0985848369', 'Cash', '2025-11-16 22:09:34'),
-(12, 33, 414.00, 15.00, 429.00, 'Phinnawat Yaemsanguan', '', '0661427227', '', '2025-11-17 12:04:54'),
-(13, 33, 225.00, 15.00, 240.00, 'Phinnawat Yaemsanguan', 'qq', '0661427227', 'Cash', '2025-11-17 12:47:59'),
-(14, 33, 899.00, 15.00, 914.00, 'Phinnawat Yaemsanguan', 'ABC MART', '0661427227', 'Credit_card', '2025-11-17 13:11:44'),
-(15, 33, 2134.00, 15.00, 2149.00, 'Phinnawat Yaemsanguan', 'ABC MART', '0661427227', 'Credit_card', '2025-11-17 13:34:18'),
-(16, 33, 453.00, 15.00, 468.00, 'Phinnawat Yaemsanguan', 'Mickkling\'s Home\r\n', '0661427227', 'Credit_card', '2025-11-17 21:51:15'),
-(17, 33, 1606.00, 15.00, 1621.00, 'Phinnawat Yaemsanguan', 'Mickkling\'s Home\r\n', '0661427227', 'Credit_card', '2025-11-17 22:10:36'),
-(18, 33, 3561.00, 15.00, 3576.00, 'Phinnawat Yaemsanguan', 'Mickkling\'s Home\r\n', '0661427227', 'Credit_card', '2025-11-17 22:27:19'),
-(19, 33, 1949.00, 15.00, 1964.00, 'Phinnawat Yaemsanguan', 'Mickkling\'s Home\r\n', '0661427227', 'Credit_card', '2025-11-17 22:33:05'),
-(20, 33, 1512.00, 15.00, 1527.00, 'Phinnawat Yaemsanguan', 'SIIT', '0661427227', 'Credit_card', '2025-11-18 11:50:00'),
-(21, 33, 364.00, 15.00, 379.00, 'Phinnawat Yaemsanguan', 'SIIT', '0661427227', 'Credit_card', '2025-11-18 13:09:55'),
-(22, 33, 175.00, 15.00, 190.00, 'Phinnawat Yaemsanguan', 'บ้านทรายทอง', '0661427227', 'Credit_card', '2025-11-18 13:36:40'),
-(23, 33, 289.00, 15.00, 304.00, 'pai meung tai', 'บ้านทรายทอง', '0987665432', 'Credit_card', '2025-11-19 10:59:43'),
-(24, 32, 3999996.00, 15.00, 4000011.00, 'Peppo', 'อยู่ในใจมิ๊ก', '123456789', 'Credit_card', '2025-11-19 11:04:28'),
-(25, 32, 1000483.00, 15.00, 1000498.00, 'Peppo', 'อยู่ในใจมิ๊ก', '55555555', 'Credit_card', '2025-11-19 11:05:41'),
-(26, 33, 640.00, 15.00, 655.00, 'qwertyui', 'บ้านทรายทอง', '123456789', 'Credit_card', '2025-11-19 11:12:08'),
-(27, 33, 640.00, 15.00, 655.00, 'brrrrrr', 'บ้านทรายทอง', '12345678', 'Credit_card', '2025-11-19 11:12:20'),
-(28, 33, 640.00, 15.00, 655.00, 'ytreww', 'บ้านทรายทอง', '0987654321', 'Credit_card', '2025-11-19 11:12:32'),
-(29, 33, 1000324.00, 15.00, 1000339.00, 'miipokewklej', 'บ้านทรายทอง', '0909090909', 'Credit_card', '2025-11-19 11:14:34'),
-(30, 33, 2000427.00, 15.00, 2000442.00, 'wertyujik', 'บ้านทรายทอง', '0900099988', '', '2025-11-19 11:42:59'),
-(31, 33, 1003320.00, 15.00, 1003335.00, 'qwertyuiol', 'NAHEE', '0998887654', '', '2025-11-19 12:03:30'),
-(32, 33, 1000149.00, 15.00, 1000164.00, 'asd', 'NAHEE', '123123123123', '', '2025-11-19 15:26:22');
+(1, 33, 825.00, 15.00, 840.00, 'Phinnawat Yaemsanguan', 'KUY', '0661427227', 2, '2025-11-19 22:38:35');
 
 -- --------------------------------------------------------
 
@@ -223,8 +157,8 @@ INSERT INTO `orders` (`Order_ID`, `User_ID`, `Order_Subtotal`, `Delivery_Fee`, `
 
 CREATE TABLE `payment_method` (
   `Payment_Method_ID` int NOT NULL,
-  `Method_Type` enum('Cash','Credit_card') CHARACTER SET utf8mb4 NOT NULL DEFAULT 'Cash'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
+  `Method_Type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'Cash'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `payment_method`
@@ -248,7 +182,7 @@ CREATE TABLE `product` (
   `Height` decimal(5,2) DEFAULT NULL,
   `Width` decimal(5,2) DEFAULT NULL,
   `image` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `product`
@@ -260,10 +194,11 @@ INSERT INTO `product` (`Product_ID`, `Product_Name`, `Product_Price`, `Length`, 
 (3, 'Morning Glory (Pak Boong) 500g', 25.00, 35.00, 5.00, 10.00, 'images/product/3.png'),
 (4, 'Pork Loin 1kg', 165.00, 25.00, 8.00, 15.00, 'images/product/4.png'),
 (5, 'Seabass Cleaned 800g', 220.00, 30.00, 8.00, 12.00, 'images/product/product.5.jpeg'),
-(6, 'mick', 999999.00, 0.01, 0.01, 100.00, 'images/product/image-1763525031001-364178549.jpeg'),
+(6, 'mick', 999999.00, 1.00, 1.00, 100.00, 'images/product/product.6.JPG'),
 (7, 'jhbkn', 99.00, 0.05, 0.02, 0.02, 'images/product/image-1763526860919-587701839.jpeg'),
 (8, 'jhgkhj', 777.00, 0.02, 0.02, 0.02, 'images/product/image-1763527050793-363785141.png'),
-(9, 'pop', 999.00, 9.00, 9.00, 9.00, '/images/product/image-1763527223299-678248721.jpeg');
+(9, '3rrgne23ngop23', 111.00, 9.00, 9.00, 9.00, 'images/product/product.9.jpg'),
+(10, 'mick secret', 12345.00, 2.00, 3.00, 4.00, 'images/product/image-1763567561723-134831359.png');
 
 -- --------------------------------------------------------
 
@@ -277,7 +212,7 @@ CREATE TABLE `review` (
   `Review_date` datetime DEFAULT NULL,
   `Review_text` text,
   `Rating` int DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `review`
@@ -304,33 +239,12 @@ INSERT INTO `review` (`Review_No`, `User_ID`, `Review_date`, `Review_text`, `Rat
 (18, 32, '2025-11-19 11:05:47', 'ljhldtaeszdfghujikol', 4),
 (19, 33, '2025-11-19 11:14:44', 'hee kuy tad', 1),
 (20, 33, '2025-11-19 11:43:12', '12rtyhgfdgkxsdkyildliyxy', 3),
-(21, 33, '2025-11-19 12:03:37', '', 5);
+(21, 33, '2025-11-19 12:03:37', '', 5),
+(22, 33, '2025-11-19 22:38:45', 'emfpofmneopnf2opn3opfn2opnfop32nfop23nfnop23f', 5);
 
 --
 -- Triggers `review`
 --
-DELIMITER $$
-CREATE TRIGGER `trg_review_after_insert_update_avg` AFTER INSERT ON `review` FOR EACH ROW BEGIN
-    DECLARE v_avg   DECIMAL(3,2);
-    DECLARE v_count INT;
-
-    IF NEW.User_ID IS NOT NULL THEN
-
-        SELECT AVG(Rating), COUNT(*)
-        INTO v_avg, v_count
-        FROM review
-        WHERE User_ID = NEW.User_ID;
-
-  
-        INSERT INTO user_rating_summary (User_ID, Avg_Rating, Review_Count)
-        VALUES (NEW.User_ID, v_avg, v_count)
-        ON DUPLICATE KEY UPDATE
-            Avg_Rating   = v_avg,
-            Review_Count = v_count;
-    END IF;
-END
-$$
-DELIMITER ;
 DELIMITER $$
 CREATE TRIGGER `trg_review_before_insert_set_date` BEFORE INSERT ON `review` FOR EACH ROW BEGIN
     IF NEW.Review_Date IS NULL THEN
@@ -354,7 +268,7 @@ CREATE TABLE `user` (
   `DOB` date DEFAULT NULL,
   `Email` varchar(100) NOT NULL,
   `PhoneNumber` varchar(10) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `user`
@@ -367,32 +281,8 @@ INSERT INTO `user` (`ID`, `Fname`, `Lname`, `Address`, `DOB`, `Email`, `PhoneNum
 (4, 'Peppo', 'Rob', 'Khon Kaen', '1999-12-05', 'peppo@example.com', NULL),
 (5, 'Yew', 'Tia', 'Tak', '2003-06-15', 'yew@example.com', NULL),
 (32, 'Ratchanon', 'Wongwitutai', 'อยู่ในใจมิ๊ก', '2025-10-29', '6622780268@ggez', '0985848369'),
-(33, 'Mick', 'Wolff', 'NAHEE', '2025-10-26', 'MW@gmail.cum', '0999999999'),
+(33, 'Mick', 'Wolff', 'KUY', '2025-10-26', 'MW@gmail.cum', '0999999999'),
 (34, 'fourty', 'fifty', 'siit', '2025-11-05', 'seventy@gmail.com', '0987654432');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `user_rating_summary`
---
-
-CREATE TABLE `user_rating_summary` (
-  `User_ID` int NOT NULL,
-  `Avg_Rating` decimal(3,2) NOT NULL,
-  `Review_Count` int NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
-
---
--- Dumping data for table `user_rating_summary`
---
-
-INSERT INTO `user_rating_summary` (`User_ID`, `Avg_Rating`, `Review_Count`) VALUES
-(2, 4.00, 1),
-(3, 5.00, 1),
-(4, 5.00, 1),
-(5, 4.50, 2),
-(32, 4.00, 1),
-(33, 3.25, 4);
 
 --
 -- Indexes for dumped tables
@@ -419,7 +309,8 @@ ALTER TABLE `orderitems`
 --
 ALTER TABLE `orders`
   ADD PRIMARY KEY (`Order_ID`),
-  ADD KEY `fk_orders_user` (`User_ID`);
+  ADD KEY `fk_orders_user` (`User_ID`),
+  ADD KEY `Payment_Method` (`Payment_Method`);
 
 --
 -- Indexes for table `payment_method`
@@ -448,12 +339,6 @@ ALTER TABLE `user`
   ADD UNIQUE KEY `Email` (`Email`);
 
 --
--- Indexes for table `user_rating_summary`
---
-ALTER TABLE `user_rating_summary`
-  ADD PRIMARY KEY (`User_ID`);
-
---
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -467,13 +352,13 @@ ALTER TABLE `login`
 -- AUTO_INCREMENT for table `orderitems`
 --
 ALTER TABLE `orderitems`
-  MODIFY `OrderItem_ID` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
+  MODIFY `OrderItem_ID` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `Order_ID` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `Order_ID` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `payment_method`
@@ -485,13 +370,13 @@ ALTER TABLE `payment_method`
 -- AUTO_INCREMENT for table `product`
 --
 ALTER TABLE `product`
-  MODIFY `Product_ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `Product_ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `review`
 --
 ALTER TABLE `review`
-  MODIFY `Review_No` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `Review_No` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `user`
@@ -513,26 +398,21 @@ ALTER TABLE `login`
 -- Constraints for table `orderitems`
 --
 ALTER TABLE `orderitems`
-  ADD CONSTRAINT `orderitems_ibfk_1` FOREIGN KEY (`Order_ID`) REFERENCES `orders` (`Order_ID`),
-  ADD CONSTRAINT `orderitems_ibfk_2` FOREIGN KEY (`Product_ID`) REFERENCES `product` (`Product_ID`);
+  ADD CONSTRAINT `orderitems_ibfk_2` FOREIGN KEY (`Product_ID`) REFERENCES `product` (`Product_ID`),
+  ADD CONSTRAINT `orderitems_ibfk_3` FOREIGN KEY (`OrderItem_ID`) REFERENCES `orders` (`Order_ID`);
 
 --
 -- Constraints for table `orders`
 --
 ALTER TABLE `orders`
-  ADD CONSTRAINT `fk_orders_user` FOREIGN KEY (`User_ID`) REFERENCES `user` (`ID`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_orders_user` FOREIGN KEY (`User_ID`) REFERENCES `user` (`ID`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`Payment_Method`) REFERENCES `payment_method` (`Payment_Method_ID`);
 
 --
 -- Constraints for table `review`
 --
 ALTER TABLE `review`
   ADD CONSTRAINT `review_ibfk_2` FOREIGN KEY (`User_ID`) REFERENCES `user` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `user_rating_summary`
---
-ALTER TABLE `user_rating_summary`
-  ADD CONSTRAINT `fk_urs_user` FOREIGN KEY (`User_ID`) REFERENCES `user` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
