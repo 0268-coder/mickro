@@ -44,6 +44,10 @@ const reviewRouter = require("./routes/review")
 const orderRouter = require("./routes/order")
 const adminProductRouter = require('./routes/adminFolder/adminProduct.js')
 const adminOrderRouter = require('./routes/adminFolder/adminOrder.js')
+const adminPaymentMethodRouter = require('./routes/adminFolder/adminPaymentMethod.js')
+const staffOrderRouter = require('./routes/staffFolder/staffOrder.js')
+const staffProductRouter = require('./routes/staffFolder/staffProduct.js')
+
 
 app.use("/login",loginRouter)
 app.use("/register", registerRouter);
@@ -56,6 +60,9 @@ app.use("/review",reviewRouter)
 app.use("/order",orderRouter)
 app.use("/admin/product",adminProductRouter)
 app.use("/admin/order",adminOrderRouter)
+app.use("/admin/payment-method",adminPaymentMethodRouter)
+app.use("/staff/product",staffProductRouter)
+app.use("/staff/order",staffOrderRouter)
 
 app.get("/", authenticateUser, async (req,res)=>{
 
@@ -64,6 +71,101 @@ app.get("/", authenticateUser, async (req,res)=>{
     const [allProducts] = await adminConnection.query('SELECT * FROM Product')
 
     res.render("product/product", { userAddress: userAddr, user: req.session.user,product: allProducts })
+});
+
+app.get("/staff", authenticateUser,authenticateStaff, async (req,res)=>{
+    try {
+        // Fetch all orders
+        const [orders] = await staffConnection.query(`
+            SELECT 
+                Order_ID,
+                Full_Name,
+                Phone,
+                Address,
+                Order_Date,
+                Payment_Method,
+                Order_Total
+            FROM orders
+            ORDER BY Order_Date DESC
+        `)
+        
+        // Calculate total revenue
+        const [revenueResult] = await staffConnection.query(`
+            SELECT COALESCE(SUM(Order_Total), 0) as totalRevenue
+            FROM orders
+        `)
+        const totalRevenue = revenueResult[0].totalRevenue
+        
+        // Calculate today's revenue
+        const [todayRevenueResult] = await staffConnection.query(`
+            SELECT COALESCE(SUM(Order_Total), 0) as todayRevenue
+            FROM orders
+            WHERE DATE(Order_Date) = CURDATE()
+        `)
+        const todayRevenue = todayRevenueResult[0].todayRevenue
+        
+        // Count all orders
+        const [orderCountResult] = await staffConnection.query(`
+            SELECT COUNT(*) as totalOrders
+            FROM orders
+        `)
+        const totalOrders = orderCountResult[0].totalOrders
+        
+        // Count today's orders
+        const [todayOrdersResult] = await staffConnection.query(`
+            SELECT COUNT(*) as todayOrders
+            FROM orders
+            WHERE DATE(Order_Date) = CURDATE()
+        `)
+        const todayOrders = todayOrdersResult[0].todayOrders
+        
+        // Count all users
+        const [userCountResult] = await staffConnection.query(`
+            SELECT COUNT(*) as totalUsers
+            FROM user
+        `)
+        const totalUsers = userCountResult[0].totalUsers
+        
+        // Count today's new users (assuming users have a date field, or using ID as proxy)
+        // If user table has a created_at or registration_date field, use that
+        // For now, I'll count users with today's date if DOB is used as registration
+        const [todayUsersResult] = await staffConnection.query(`
+            SELECT COUNT(*) as todayUsers
+            FROM user
+            WHERE DATE(DOB) = CURDATE()
+        `)
+        const todayUsers = todayUsersResult[0].todayUsers
+        
+        // Count all products
+        const [productCountResult] = await staffConnection.query(`
+            SELECT COUNT(*) as totalProducts
+            FROM product
+        `)
+        const totalProducts = productCountResult[0].totalProducts
+        
+        res.render("staff/staff", { 
+            orders: orders,
+            totalRevenue: totalRevenue,
+            todayRevenue: todayRevenue,
+            totalOrders: totalOrders,
+            todayOrders: todayOrders,
+            totalUsers: totalUsers,
+            todayUsers: todayUsers,
+            totalProducts: totalProducts
+        });
+    } catch (error) {
+        console.error("Error fetching staff data:", error)
+        res.render("staff/staff", { 
+            orders: [],
+            totalRevenue: 0,
+            todayRevenue: 0,
+            totalOrders: 0,
+            todayOrders: 0,
+            totalUsers: 0,
+            todayUsers: 0,
+            totalProducts: 0
+        });
+    }
 });
 
 app.get("/admin", authenticateUser,authenticateAdmin, async (req,res)=>{
@@ -136,6 +238,14 @@ app.get("/admin", authenticateUser,authenticateAdmin, async (req,res)=>{
         `)
         const totalProducts = productCountResult[0].totalProducts
         
+        // Fetch payment methods
+        const paymentMethodModel = require('./models/admin_payment_method');
+        const paymentMethods = await paymentMethodModel.getPaymentMethod();
+        
+        // Fetch user login status
+        const adminLoginStatusModel = require('./models/admin_login_status');
+        const loginStatus = await adminLoginStatusModel.getLoginStatus();
+        
         res.render("admin/adminpage", { 
             orders: orders,
             totalRevenue: totalRevenue,
@@ -144,7 +254,9 @@ app.get("/admin", authenticateUser,authenticateAdmin, async (req,res)=>{
             todayOrders: todayOrders,
             totalUsers: totalUsers,
             todayUsers: todayUsers,
-            totalProducts: totalProducts
+            totalProducts: totalProducts,
+            paymentMethods: paymentMethods,
+            loginStatus: loginStatus
         });
     } catch (error) {
         console.error("Error fetching admin data:", error)
@@ -156,8 +268,23 @@ app.get("/admin", authenticateUser,authenticateAdmin, async (req,res)=>{
             todayOrders: 0,
             totalUsers: 0,
             todayUsers: 0,
-            totalProducts: 0
+            totalProducts: 0,
+            paymentMethods: [],
+            loginStatus: []
         });
+    }
+});
+
+// Update user login status
+app.post("/admin/user-status/update", authenticateUser, authenticateAdmin, async (req, res) => {
+    try {
+        const { username, status } = req.body;
+        const adminLoginStatusModel = require('./models/admin_login_status');
+        await adminLoginStatusModel.updateLoginStatus(username, status);
+        res.redirect("/admin#user-status");
+    } catch (error) {
+        console.error("Error updating user status:", error);
+        res.status(500).redirect("/admin#user-status");
     }
 });
 

@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const {userConnection,adminConnection,staffConnection} = require('../../db')
-const db = adminConnection
+const db = staffConnection
 
 // GET all orders for admin
 router.get("/", async (req, res) => {
@@ -72,11 +72,7 @@ router.get("/", async (req, res) => {
         `)
         const totalProducts = productCountResult[0].totalProducts
         
-        // Fetch payment methods
-        const paymentMethodModel = require('../../models/admin_payment_method');
-        const paymentMethods = await paymentMethodModel.getPaymentMethod();
-        
-        res.render("admin/adminpage", { 
+        res.render("staff/staff", { 
             orders: orders,
             totalRevenue: totalRevenue,
             todayRevenue: todayRevenue,
@@ -84,8 +80,7 @@ router.get("/", async (req, res) => {
             todayOrders: todayOrders,
             totalUsers: totalUsers,
             todayUsers: todayUsers,
-            totalProducts: totalProducts,
-            paymentMethods: paymentMethods
+            totalProducts: totalProducts
         })
     } catch (error) {
         console.error("Error fetching orders:", error)
