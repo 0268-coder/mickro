@@ -141,7 +141,6 @@ router.post('/', async (req, res) => {
                 "SELECT Product_Price FROM Product WHERE Product_ID = ?",
                 [itemID]
             )
-            console.log(results)
             if (results.length === 0) continue
 
             const unitPrice = parseFloat(results[0].Product_Price)

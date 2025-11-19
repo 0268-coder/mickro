@@ -54,7 +54,7 @@
                 <p class="text-sm"><%= message %></p>
             </div>
         <% } %>
-
+        
         <% if (cartItems && cartItems.length > 0) { %>
         <div class="grid gap-4 lg:grid-cols-3">
             <!-- Left Column: Contact & Delivery -->
@@ -161,7 +161,7 @@
                                     <%
                                         let imgPath = "/images/logo.png";
                                         const lower = (item.name || "").toLowerCase();
-                                        
+
                                          if(item.image != null && item.image != ""){
                                         imgPath = item.image
                                     }
