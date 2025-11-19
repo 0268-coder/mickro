@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:8889
--- Generation Time: Nov 18, 2025 at 07:38 AM
+-- Generation Time: Nov 19, 2025 at 08:28 AM
 -- Server version: 8.0.40
 -- PHP Version: 8.3.14
 
@@ -25,28 +25,6 @@ DELIMITER $$
 --
 -- Procedures
 --
-CREATE DEFINER=`root`@`localhost` PROCEDURE `calculate_order_total` (IN `p_order_id` INT)   BEGIN
-    DECLARE v_subtotal DECIMAL(10,2);
-
-    -- 1) Calculate subtotal from orderitems
-    SELECT SUM(Quantity * Unit_Price)
-    INTO v_subtotal
-    FROM orderitems
-    WHERE Order_ID = p_order_id;
-
-    -- If no items, subtotal = 0
-    IF v_subtotal IS NULL THEN
-        SET v_subtotal = 0;
-    END IF;
-
-    -- 2) Update orders table
-    UPDATE orders
-    SET 
-        Order_Subtotal = v_subtotal,
-        Order_Total    = v_subtotal + Delivery_Fee
-    WHERE Order_ID = p_order_id;
-END$$
-
 CREATE DEFINER=`root`@`localhost` PROCEDURE `register_new_user` (IN `p_username` VARCHAR(50), IN `p_password` VARCHAR(255), IN `p_fname` VARCHAR(50), IN `p_lname` VARCHAR(50), IN `p_email` VARCHAR(255), IN `p_phoneNumber` VARCHAR(20), IN `p_dateOfBirth` DATE, IN `p_address` VARCHAR(255))   BEGIN
     DECLARE v_user_id INT;
 
@@ -61,7 +39,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `register_new_user` (IN `p_username`
     INSERT INTO login (Username, Password, Status, User_ID)
     VALUES (
         p_username,
-        UNHEX(SHA2(p_password, 256)),  -- hash password
+        p_password,  -- hash password
         'user',
         v_user_id
     );
@@ -93,8 +71,9 @@ INSERT INTO `login` (`Login_ID`, `Username`, `Password`, `Status`, `User_ID`) VA
 (102, 'ping01', 0x4b7201735c980845dfea505bd3cb694ea4c56c1e378e4be3333f41c4e4342398, 'user', 3),
 (103, 'peppo01', 0xbb244c9456c9b934d0d36d541a7314fea0099871163ad97fea85f8139ce4d6c0, 'user', 4),
 (104, 'yew01', 0xadca8cafa3caab6e11fb222d68d4c3c09df64864fbad2881ebcf2b9877f020ba, 'user', 5),
-(105, 'peppo', 0x243262243133246f6d4d4e4a316941762e4e4c572e4f37336d32466b757957414b654a333439566d76394e70426a3952364f5a736850776445353053, 'user', 32),
-(106, 'MW', 0x2432622431332439454d32376f78484c6e6456712e6f4649587861636547655a6636416c3952695077773548456c72706c4e6258797732457a356965, 'user', 33);
+(105, 'peppo', 0x243262243133246f6d4d4e4a316941762e4e4c572e4f37336d32466b757957414b654a333439566d76394e70426a3952364f5a736850776445353053, 'admin', 32),
+(106, 'MW', 0x2432622431332439454d32376f78484c6e6456712e6f4649587861636547655a6636416c3952695077773548456c72706c4e6258797732457a356965, 'user', 33),
+(107, 'sixty', 0x243262243133246376623931334f626a6d6a5a2f50614b4a412f337a755a6e5a375a7353776376614e797771664e6978394a4d777a39456b63434b79, 'user', 34);
 
 -- --------------------------------------------------------
 
@@ -159,7 +138,25 @@ INSERT INTO `orderitems` (`OrderItem_ID`, `Order_ID`, `Product_ID`, `Quantity`, 
 (42, 21, 2, 1, 75.00),
 (43, 21, 1, 1, 189.00),
 (44, 22, 2, 1, 75.00),
-(45, 22, 3, 4, 25.00);
+(45, 22, 3, 4, 25.00),
+(46, 23, 3, 1, 25.00),
+(47, 23, 2, 1, 75.00),
+(48, 23, 1, 1, 189.00),
+(49, 24, 6, 4, 999999.00),
+(50, 25, 6, 1, 999999.00),
+(51, 25, 5, 1, 220.00),
+(52, 25, 1, 1, 189.00),
+(53, 25, 2, 1, 75.00),
+(54, 29, 6, 1, 999999.00),
+(55, 29, 3, 13, 25.00),
+(56, 30, 6, 2, 999999.00),
+(57, 30, 4, 2, 165.00),
+(58, 30, 7, 1, 99.00),
+(59, 31, 1, 7, 189.00),
+(60, 31, 9, 2, 999.00),
+(61, 31, 6, 1, 999999.00),
+(62, 32, 2, 2, 75.00),
+(63, 32, 6, 1, 999999.00);
 
 --
 -- Triggers `orderitems`
@@ -257,7 +254,17 @@ INSERT INTO `orders` (`Order_ID`, `User_ID`, `Order_Subtotal`, `Delivery_Fee`, `
 (19, 33, 1949.00, 15.00, 1964.00, 'Phinnawat Yaemsanguan', 'Mickkling\'s Home\r\n', '0661427227', 'Credit_card', '2025-11-17 22:33:05'),
 (20, 33, 1512.00, 15.00, 1527.00, 'Phinnawat Yaemsanguan', 'SIIT', '0661427227', 'Credit_card', '2025-11-18 11:50:00'),
 (21, 33, 364.00, 15.00, 379.00, 'Phinnawat Yaemsanguan', 'SIIT', '0661427227', 'Credit_card', '2025-11-18 13:09:55'),
-(22, 33, 175.00, 15.00, 190.00, 'Phinnawat Yaemsanguan', 'บ้านทรายทอง', '0661427227', 'Credit_card', '2025-11-18 13:36:40');
+(22, 33, 175.00, 15.00, 190.00, 'Phinnawat Yaemsanguan', 'บ้านทรายทอง', '0661427227', 'Credit_card', '2025-11-18 13:36:40'),
+(23, 33, 289.00, 15.00, 304.00, 'pai meung tai', 'บ้านทรายทอง', '0987665432', 'Credit_card', '2025-11-19 10:59:43'),
+(24, 32, 3999996.00, 15.00, 4000011.00, 'Peppo', 'อยู่ในใจมิ๊ก', '123456789', 'Credit_card', '2025-11-19 11:04:28'),
+(25, 32, 1000483.00, 15.00, 1000498.00, 'Peppo', 'อยู่ในใจมิ๊ก', '55555555', 'Credit_card', '2025-11-19 11:05:41'),
+(26, 33, 640.00, 15.00, 655.00, 'qwertyui', 'บ้านทรายทอง', '123456789', 'Credit_card', '2025-11-19 11:12:08'),
+(27, 33, 640.00, 15.00, 655.00, 'brrrrrr', 'บ้านทรายทอง', '12345678', 'Credit_card', '2025-11-19 11:12:20'),
+(28, 33, 640.00, 15.00, 655.00, 'ytreww', 'บ้านทรายทอง', '0987654321', 'Credit_card', '2025-11-19 11:12:32'),
+(29, 33, 1000324.00, 15.00, 1000339.00, 'miipokewklej', 'บ้านทรายทอง', '0909090909', 'Credit_card', '2025-11-19 11:14:34'),
+(30, 33, 2000427.00, 15.00, 2000442.00, 'wertyujik', 'บ้านทรายทอง', '0900099988', '', '2025-11-19 11:42:59'),
+(31, 33, 1003320.00, 15.00, 1003335.00, 'qwertyuiol', 'NAHEE', '0998887654', '', '2025-11-19 12:03:30'),
+(32, 33, 1000149.00, 15.00, 1000164.00, 'asd', 'NAHEE', '123123123123', '', '2025-11-19 15:26:22');
 
 -- --------------------------------------------------------
 
@@ -267,7 +274,7 @@ INSERT INTO `orders` (`Order_ID`, `User_ID`, `Order_Subtotal`, `Delivery_Fee`, `
 
 CREATE TABLE `payment_method` (
   `Payment_Method_ID` int NOT NULL,
-  `Method_Type` enum('Cash','Credit_card') NOT NULL
+  `Method_Type` enum('Cash','Credit_card') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'Cash'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
@@ -299,11 +306,15 @@ CREATE TABLE `product` (
 --
 
 INSERT INTO `product` (`Product_ID`, `Product_Name`, `Product_Price`, `Length`, `Height`, `Width`, `image`) VALUES
-(1, 'Thai Jasmine Rice 5kg', 189.00, 40.00, 10.00, 30.00, NULL),
-(2, 'Cage-Free Eggs (10 pcs)', 75.00, 30.00, 8.00, 20.00, NULL),
-(3, 'Morning Glory (Pak Boong) 500g', 25.00, 35.00, 5.00, 10.00, NULL),
-(4, 'Pork Loin 1kg', 165.00, 25.00, 8.00, 15.00, NULL),
-(5, 'Seabass Cleaned 800g', 220.00, 30.00, 8.00, 12.00, NULL);
+(1, 'Thai Jasmine Rice 5kg', 189.00, 40.00, 10.00, 30.00, 'images/product/1.png'),
+(2, 'Cage-Free Eggs (10 pcs)', 75.00, 30.00, 8.00, 20.00, 'images/product/2.png'),
+(3, 'Morning Glory (Pak Boong) 500g', 25.00, 35.00, 5.00, 10.00, 'images/product/3.png'),
+(4, 'Pork Loin 1kg', 165.00, 25.00, 8.00, 15.00, 'images/product/4.png'),
+(5, 'Seabass Cleaned 800g', 220.00, 30.00, 8.00, 12.00, 'images/product/product.5.jpeg'),
+(6, 'mick', 999999.00, 0.01, 0.01, 100.00, 'images/product/image-1763525031001-364178549.jpeg'),
+(7, 'jhbkn', 99.00, 0.05, 0.02, 0.02, 'images/product/image-1763526860919-587701839.jpeg'),
+(8, 'jhgkhj', 777.00, 0.02, 0.02, 0.02, 'images/product/image-1763527050793-363785141.png'),
+(9, 'pop', 999.00, 9.00, 9.00, 9.00, '/images/product/image-1763527223299-678248721.jpeg');
 
 -- --------------------------------------------------------
 
@@ -339,7 +350,12 @@ INSERT INTO `review` (`Review_No`, `User_ID`, `Review_date`, `Review_text`, `Rat
 (13, NULL, '2025-11-17 22:27:26', 'qwbfuclibDevf;ueDB:VUbpwe heheheh', 5),
 (14, NULL, '2025-11-17 22:33:12', 'anewqcnopqwj[wqjf[oqwjp[qfwj', 5),
 (15, NULL, '2025-11-18 11:50:05', '', 5),
-(16, NULL, '2025-11-18 13:36:56', 'dee makk', 5);
+(16, NULL, '2025-11-18 13:36:56', 'dee makk', 5),
+(17, 33, '2025-11-19 11:01:30', '12345', 4),
+(18, 32, '2025-11-19 11:05:47', 'ljhldtaeszdfghujikol', 4),
+(19, 33, '2025-11-19 11:14:44', 'hee kuy tad', 1),
+(20, 33, '2025-11-19 11:43:12', '12rtyhgfdgkxsdkyildliyxy', 3),
+(21, 33, '2025-11-19 12:03:37', '', 5);
 
 --
 -- Triggers `review`
@@ -380,7 +396,8 @@ INSERT INTO `user` (`ID`, `Fname`, `Lname`, `Address`, `DOB`, `Email`, `PhoneNum
 (4, 'Peppo', 'Rob', 'Khon Kaen', '1999-12-05', 'peppo@example.com', NULL),
 (5, 'Yew', 'Tia', 'Tak', '2003-06-15', 'yew@example.com', NULL),
 (32, 'Ratchanon', 'Wongwitutai', 'อยู่ในใจมิ๊ก', '2025-10-29', '6622780268@ggez', '0985848369'),
-(33, 'Mick', 'Wolff', 'บ้านทรายทอง', '2025-10-26', 'MW@gmail.cum', '0999999999');
+(33, 'Mick', 'Wolff', 'NAHEE', '2025-10-26', 'MW@gmail.cum', '0999999999'),
+(34, 'fourty', 'fifty', 'siit', '2025-11-05', 'seventy@gmail.com', '0987654432');
 
 --
 -- Indexes for dumped tables
@@ -442,19 +459,19 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `login`
 --
 ALTER TABLE `login`
-  MODIFY `Login_ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=107;
+  MODIFY `Login_ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=108;
 
 --
 -- AUTO_INCREMENT for table `orderitems`
 --
 ALTER TABLE `orderitems`
-  MODIFY `OrderItem_ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
+  MODIFY `OrderItem_ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `Order_ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `Order_ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT for table `payment_method`
@@ -466,19 +483,19 @@ ALTER TABLE `payment_method`
 -- AUTO_INCREMENT for table `product`
 --
 ALTER TABLE `product`
-  MODIFY `Product_ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `Product_ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `review`
 --
 ALTER TABLE `review`
-  MODIFY `Review_No` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `Review_No` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 
 --
 -- Constraints for dumped tables
