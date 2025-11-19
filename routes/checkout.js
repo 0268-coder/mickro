@@ -67,7 +67,7 @@ router.get('/', async (req, res) => {
             subtotal: (0).toFixed(2),
             deliveryFee: DELIVERY_FEE.toFixed(2),
             total: (0).toFixed(2),
-            message: "Error loading checkout page. Please try again."
+            message: "Please fill out your contact information"
         })
     }
 })
@@ -209,7 +209,7 @@ router.post('/', async (req, res) => {
                 subtotal: subtotal.toFixed(2),
                 deliveryFee: DELIVERY_FEE.toFixed(2),
                 total: total.toFixed(2),
-                message: "Error placing order. Please try again."
+                message: "Please fill out your contact information."
             })
         } catch (innerErr) {
             console.error("Error rebuilding cart for error page:", innerErr)
@@ -218,7 +218,7 @@ router.post('/', async (req, res) => {
                 subtotal: (0).toFixed(2),
                 deliveryFee: DELIVERY_FEE.toFixed(2),
                 total: (0).toFixed(2),
-                message: "Error placing order. Please try again."
+                message: "Please fill out your contact information."
             })
         }
     }
