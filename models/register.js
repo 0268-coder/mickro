@@ -1,16 +1,16 @@
 const {userConnection,adminConnection,staffConnection} = require('../db')
-const connection = userConnection
+const connection = adminConnection
 
 const registerModel = {
     // add Register queries to database
-    register: async (firstName, lastName, username, email, password, dateOfBirth, phoneNumber, address) => {
+    register: async (username, password, firstName, lastName, email, phoneNumber, dateOfBirth, address) => {
         //call procedure
         const [userRows] = await connection.query(
             "CALL register_new_user(?,?,?,?,?,?,?,?)",
             [username,password,firstName,lastName,email,phoneNumber,dateOfBirth,address]
         );
 
-        return { user: userRows, login: loginRows };
+        return { user: userRows };
     },
 
     //get User from Username
