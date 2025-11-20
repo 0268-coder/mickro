@@ -76,7 +76,7 @@ router.route("/add")
             }
 
             await productModel.addProduct(name, price, length, height, width, finalImagePath);
-            res.redirect('/staff/produt');
+            res.redirect('/staff/product');
         } catch (err) {
             console.error("Add Product Error:", err);
             res.status(500).send("Failed to add product.");

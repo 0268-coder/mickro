@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:8889
--- Generation Time: Nov 19, 2025 at 03:55 PM
+-- Generation Time: Nov 20, 2025 at 04:11 PM
 -- Server version: 8.0.40
 -- PHP Version: 8.3.14
 
@@ -72,8 +72,14 @@ INSERT INTO `login` (`Login_ID`, `Username`, `Password`, `Status`, `User_ID`) VA
 (103, 'peppo01', 0xbb244c9456c9b934d0d36d541a7314fea0099871163ad97fea85f8139ce4d6c0, 'user', 4),
 (104, 'yew01', 0xadca8cafa3caab6e11fb222d68d4c3c09df64864fbad2881ebcf2b9877f020ba, 'user', 5),
 (105, 'peppo', 0x243262243133246f6d4d4e4a316941762e4e4c572e4f37336d32466b757957414b654a333439566d76394e70426a3952364f5a736850776445353053, 'admin', 32),
-(106, 'MW', 0x2432622431332439454d32376f78484c6e6456712e6f4649587861636547655a6636416c3952695077773548456c72706c4e6258797732457a356965, 'user', 33),
-(107, 'sixty', 0x243262243133246376623931334f626a6d6a5a2f50614b4a412f337a755a6e5a375a7353776376614e797771664e6978394a4d777a39456b63434b79, 'user', 34);
+(106, 'MW', 0x2432622431332439454d32376f78484c6e6456712e6f4649587861636547655a6636416c3952695077773548456c72706c4e6258797732457a356965, 'staff', 33),
+(107, 'sixty', 0x243262243133246376623931334f626a6d6a5a2f50614b4a412f337a755a6e5a375a7353776376614e797771664e6978394a4d777a39456b63434b79, 'user', 34),
+(108, 'MM', 0x243262243133245249375566396d4358563150435a4e7a7a4454386a4f6b4e7a6f394e73794238735a314b412e4e6a74747a74516838566d586c4e4f, 'user', 35),
+(109, 'qwe', 0x243262243133245058752f526b374c46737641736d44694a433531367572545259583343675a5044386c724a62446a6c37787453764c745256496536, 'user', 36),
+(110, 'rs', 0x243262243133246730344d6363476d41563575684255353134674e37757a2e664a367061372f6e4d344167632e7a586957764d2e36506869534e322e, 'staff', 37),
+(111, 'gegege', 0x24326224313324493435374132686a3938776f433738742f777332676561394374484d342e4a72573752335a446c4553775371756458305778316971, 'user', 38),
+(112, 'asdsa', 0x243262243133244b776c426b6c7649486e56746d4533415630387865754f666d577171617a4e496a445a31666273384e6b38794b72516e47356a7543, 'user', 39),
+(113, '1234567_Mick', 0x243262243133244747763271454663364e775a567430666f45694e632e6a57424a6b5042466252746c4b59612f484c77686568684a6c2e5236645936, 'user', 40);
 
 -- --------------------------------------------------------
 
@@ -94,7 +100,12 @@ CREATE TABLE `orderitems` (
 --
 
 INSERT INTO `orderitems` (`OrderItem_ID`, `Order_ID`, `Product_ID`, `Quantity`, `Unit_Price`) VALUES
-(1, 1, 2, 11, 75.00);
+(1, 15, 1, 1, 189.00),
+(2, 15, 2, 1, 75.00),
+(3, 15, 3, 1, 25.00),
+(4, 15, 4, 1, 165.00),
+(5, 15, 5, 1, 220.00),
+(6, 15, 11, 1, 13.00);
 
 --
 -- Triggers `orderitems`
@@ -147,7 +158,20 @@ CREATE TABLE `orders` (
 --
 
 INSERT INTO `orders` (`Order_ID`, `User_ID`, `Order_Subtotal`, `Delivery_Fee`, `Order_Total`, `Full_Name`, `Address`, `Phone`, `Payment_Method`, `Order_Date`) VALUES
-(1, 33, 825.00, 15.00, 840.00, 'Phinnawat Yaemsanguan', 'KUY', '0661427227', 2, '2025-11-19 22:38:35');
+(1, 33, 825.00, 15.00, 840.00, 'Phinnawat Yaemsanguan', 'KUY', '0661427227', 2, '2025-11-19 22:38:35'),
+(2, 33, 378.00, 15.00, 393.00, 'Phinnawat Yaemsanguan', 'KUY', '06614272278888', 2, '2025-11-20 20:16:36'),
+(3, 32, 121.50, 15.00, 136.50, 'peoop', 'IYDDD', '0881118811', 1, '2025-11-20 20:39:51'),
+(4, 32, 310.50, 15.00, 325.50, 'Phinnawat Yaemsanguan', 'IYDDD', '0661427227', 1, '2025-11-20 20:39:57'),
+(5, 32, 310.50, 15.00, 325.50, 'Phinnawat Yaemsanguan', 'IYDDD', '0661427227', 1, '2025-11-20 20:40:09'),
+(6, 33, 337.50, 15.00, 352.50, 'Phinnawat Yaemsanguan', 'oowowow', '0661427227', 1, '2025-11-20 20:40:38'),
+(7, 33, 337.50, 15.00, 352.50, 'Phinnawat Yaemsanguan', 'oowowow', '0661427227', 2, '2025-11-20 20:40:48'),
+(8, 33, 332.00, 15.00, 347.00, 'Phinnawat Yaemsanguan', 'oowowow', '0661427227', 2, '2025-11-20 20:42:34'),
+(9, 33, 332.00, 15.00, 347.00, 'Phinnawat Yaemsanguan', 'oowowow', '0661427227', 2, '2025-11-20 20:42:37'),
+(10, 33, 371.00, 15.00, 386.00, 'Phinnawat Yaemsanguan', 'oowowow', '0661427227', 2, '2025-11-20 20:49:32'),
+(11, 33, 1641969.00, 15.00, 1641984.00, 'Phinnawat Yaemsanguan', 'oowowow', '0661427227', 1, '2025-11-20 20:52:08'),
+(13, 35, 197.00, 15.00, 212.00, 'Phinnawat Yaemsanguan', 'Phahonyothin Rd, Khlong Nueng, Khlong Luang District, Pathum Thani 12120', '0661427227', 2, '2025-11-20 22:01:02'),
+(14, 32, 1802.00, 15.00, 1817.00, 'Phinnawat Yaemsanguan', 'aaaa', '0661427227', 2, '2025-11-20 22:25:30'),
+(15, 38, 687.00, 15.00, 702.00, 'Phinnawat Yaemsanguan', 'PPPPP', '0661427227', 2, '2025-11-20 23:02:54');
 
 -- --------------------------------------------------------
 
@@ -189,16 +213,12 @@ CREATE TABLE `product` (
 --
 
 INSERT INTO `product` (`Product_ID`, `Product_Name`, `Product_Price`, `Length`, `Height`, `Width`, `image`) VALUES
-(1, 'Thai Jasmine Rice 5kg', 189.00, 40.00, 10.00, 30.00, 'images/product/1.png'),
+(1, 'Thai Jasmine Rice 5kg', 189.00, 40.00, 10.00, 30.00, 'images/product/product.1.png'),
 (2, 'Cage-Free Eggs (10 pcs)', 75.00, 30.00, 8.00, 20.00, 'images/product/2.png'),
 (3, 'Morning Glory (Pak Boong) 500g', 25.00, 35.00, 5.00, 10.00, 'images/product/3.png'),
 (4, 'Pork Loin 1kg', 165.00, 25.00, 8.00, 15.00, 'images/product/4.png'),
-(5, 'Seabass Cleaned 800g', 220.00, 30.00, 8.00, 12.00, 'images/product/product.5.jpeg'),
-(6, 'mick', 999999.00, 1.00, 1.00, 100.00, 'images/product/product.6.JPG'),
-(7, 'jhbkn', 99.00, 0.05, 0.02, 0.02, 'images/product/image-1763526860919-587701839.jpeg'),
-(8, 'jhgkhj', 777.00, 0.02, 0.02, 0.02, 'images/product/image-1763527050793-363785141.png'),
-(9, '3rrgne23ngop23', 111.00, 9.00, 9.00, 9.00, 'images/product/product.9.jpg'),
-(10, 'mick secret', 12345.00, 2.00, 3.00, 4.00, 'images/product/image-1763567561723-134831359.png');
+(5, 'Seabass Cleaned 800g', 220.00, 30.00, 8.00, 12.00, 'images/product/5.png'),
+(11, 'Fresh Cherry 500g', 13.00, 12.00, 3.00, 4.00, 'images/product/product.11.jpg');
 
 -- --------------------------------------------------------
 
@@ -224,23 +244,19 @@ INSERT INTO `review` (`Review_No`, `User_ID`, `Review_date`, `Review_text`, `Rat
 (3, 5, '2025-11-07 10:30:00', 'Crisp morning glory, perfect for stir-fry.', 5),
 (4, 4, '2025-11-07 14:10:00', 'Pork loin was clean and tender.', 5),
 (5, 5, '2025-11-08 09:20:00', 'Seabass was fresh; would buy again.', 4),
-(6, NULL, '2025-11-16 13:51:05', 'Mick Auan', 5),
-(7, NULL, '2025-11-16 13:58:51', 'Mick Auan mak', 1),
-(8, NULL, '2025-11-16 22:09:42', 'haha xd', 3),
-(9, NULL, '2025-11-17 12:05:00', '', 5),
-(10, NULL, '2025-11-17 13:11:57', 'diocweoc;ioevqiovqb;vui kuy', 4),
-(11, NULL, '2025-11-17 21:51:18', '', 3),
-(12, NULL, '2025-11-17 22:10:44', 'kuy', 5),
-(13, NULL, '2025-11-17 22:27:26', 'qwbfuclibDevf;ueDB:VUbpwe heheheh', 5),
-(14, NULL, '2025-11-17 22:33:12', 'anewqcnopqwj[wqjf[oqwjp[qfwj', 5),
-(15, NULL, '2025-11-18 11:50:05', '', 5),
-(16, NULL, '2025-11-18 13:36:56', 'dee makk', 5),
 (17, 33, '2025-11-19 11:01:30', '12345', 4),
 (18, 32, '2025-11-19 11:05:47', 'ljhldtaeszdfghujikol', 4),
 (19, 33, '2025-11-19 11:14:44', 'hee kuy tad', 1),
 (20, 33, '2025-11-19 11:43:12', '12rtyhgfdgkxsdkyildliyxy', 3),
 (21, 33, '2025-11-19 12:03:37', '', 5),
-(22, 33, '2025-11-19 22:38:45', 'emfpofmneopnf2opn3opfn2opnfop32nfop23nfnop23f', 5);
+(22, 33, '2025-11-19 22:38:45', 'emfpofmneopnf2opn3opfn2opnfop32nfop23nfnop23f', 5),
+(23, 33, '2025-11-20 20:16:41', 'eff33', 5),
+(24, 33, '2025-11-20 20:49:37', '13243546yu67ilkrujetyhrsbevwdcsa', 5),
+(25, 33, '2025-11-20 20:52:27', '', 1),
+(26, 33, '2025-11-20 21:19:22', 'qw', 2),
+(27, 35, '2025-11-20 22:01:06', '', 4),
+(28, 32, '2025-11-20 22:25:40', '11123467897654', 5),
+(29, 38, '2025-11-20 23:02:59', '1234567890', 5);
 
 --
 -- Triggers `review`
@@ -275,14 +291,20 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`ID`, `Fname`, `Lname`, `Address`, `DOB`, `Email`, `PhoneNumber`) VALUES
-(1, 'Mick', 'Wolff', 'Bangkok', '2001-05-14', 'mick@example.com', NULL),
-(2, 'Pop', 'Chan', 'Chiang Mai', '2000-11-22', 'pop@example.com', NULL),
-(3, 'Ping', 'LeeFam', 'Phuket', '2002-03-08', 'ping@example.com', NULL),
-(4, 'Peppo', 'Rob', 'Khon Kaen', '1999-12-05', 'peppo@example.com', NULL),
-(5, 'Yew', 'Tia', 'Tak', '2003-06-15', 'yew@example.com', NULL),
-(32, 'Ratchanon', 'Wongwitutai', 'อยู่ในใจมิ๊ก', '2025-10-29', '6622780268@ggez', '0985848369'),
-(33, 'Mick', 'Wolff', 'KUY', '2025-10-26', 'MW@gmail.cum', '0999999999'),
-(34, 'fourty', 'fifty', 'siit', '2025-11-05', 'seventy@gmail.com', '0987654432');
+(1, 'Mick', 'Wolff', 'Bangkok', '2001-05-14', 'mick@example.com', '0223334455'),
+(2, 'Pop', 'Chan', 'Chiang Mai', '2000-11-22', 'pop@example.com', '0983838383'),
+(3, 'Ping', 'LeeFam', 'Phuket', '2002-03-08', 'ping@example.com', '0039339494'),
+(4, 'Peppo', 'Rob', 'Khon Kaen', '1999-12-05', 'peppo@example.com', '0445556678'),
+(5, 'Yew', 'Tia', 'Tak', '2003-06-15', 'yew@example.com', '0933224455'),
+(32, 'Ratchanon', 'Wongwitutai', 'aaaa', '2025-10-29', '6622780268@ggez', '0985848369'),
+(33, 'Mick', 'Wolff', 'oowowow', '2025-10-26', 'MW@gmail.cum', '0999999999'),
+(34, 'fourty', 'fifty', 'siit', '2025-11-05', 'seventy@gmail.com', '0987654432'),
+(35, 'Phinnawat', 'Yaemsanguan', 'Phahonyothin Rd, Khlong Nueng, Khlong Luang District, Pathum Thani 12120', '2025-10-30', 'MM@gmail.com', '0661427227'),
+(36, 'qqqqq', 'wwwww', 'SIIA', '2025-10-31', '66@gmail.com', '0929292929'),
+(37, 'rsm', 'ysg', 'Phahonyothin Rd, Khlong Nueng, Khlong Luang District, Pathum Thani 12120', '2025-11-07', 'rs@gmail.com', '0998887766'),
+(38, 'aaaaeae', 'ergrge', 'PPPPP', '2025-10-29', 'uuu@gmail.com', '0996664242'),
+(39, 'adfgfdsa', 'asdfdsa', 'Phahonyothin Rd, Khlong Nueng, Khlong Luang District, Pathum Thani 12120', '2025-11-11', '6622770764@g.siit.tu.ac.th', '0661427227'),
+(40, 'Mick', 'Wolff', 'Phahonyothin Rd, Khlong Nueng, Khlong Luang District, Pathum Thani 12120', '2025-11-06', '69@gmail.com', '0661455555');
 
 --
 -- Indexes for dumped tables
@@ -346,43 +368,43 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `login`
 --
 ALTER TABLE `login`
-  MODIFY `Login_ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=108;
+  MODIFY `Login_ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=114;
 
 --
 -- AUTO_INCREMENT for table `orderitems`
 --
 ALTER TABLE `orderitems`
-  MODIFY `OrderItem_ID` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `OrderItem_ID` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `Order_ID` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `Order_ID` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `payment_method`
 --
 ALTER TABLE `payment_method`
-  MODIFY `Payment_Method_ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `Payment_Method_ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `product`
 --
 ALTER TABLE `product`
-  MODIFY `Product_ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `Product_ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `review`
 --
 ALTER TABLE `review`
-  MODIFY `Review_No` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `Review_No` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
+  MODIFY `ID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
 -- Constraints for dumped tables
@@ -398,15 +420,15 @@ ALTER TABLE `login`
 -- Constraints for table `orderitems`
 --
 ALTER TABLE `orderitems`
-  ADD CONSTRAINT `orderitems_ibfk_2` FOREIGN KEY (`Product_ID`) REFERENCES `product` (`Product_ID`),
-  ADD CONSTRAINT `orderitems_ibfk_3` FOREIGN KEY (`OrderItem_ID`) REFERENCES `orders` (`Order_ID`);
+  ADD CONSTRAINT `orderitems_ibfk_2` FOREIGN KEY (`Product_ID`) REFERENCES `product` (`Product_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `orderitems_ibfk_3` FOREIGN KEY (`Order_ID`) REFERENCES `orders` (`Order_ID`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 --
 -- Constraints for table `orders`
 --
 ALTER TABLE `orders`
   ADD CONSTRAINT `fk_orders_user` FOREIGN KEY (`User_ID`) REFERENCES `user` (`ID`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`Payment_Method`) REFERENCES `payment_method` (`Payment_Method_ID`);
+  ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`Payment_Method`) REFERENCES `payment_method` (`Payment_Method_ID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `review`
